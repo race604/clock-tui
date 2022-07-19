@@ -1,4 +1,5 @@
 use chrono::Duration;
+use clap::Subcommand;
 use crossterm::event::KeyCode;
 use regex::Regex;
 use tui::backend::Backend;
@@ -12,21 +13,26 @@ use self::modes::Timer;
 
 pub(crate) mod modes;
 
-#[derive(clap::ArgEnum, Clone)]
+#[derive(Debug, Subcommand)]
 pub(crate) enum Mode {
+    /// The clock mode displays the current time, the default mode.
     Clock,
-    Timer,
+    /// The timer mode displays the remaining time until the timer is finished.
+    Timer {
+        #[clap(short, long, value_parser = parse_duration, default_value = "5m")]
+        duration: Duration,
+    },
+    /// The stopwatch mode displays the elapsed time since it was started.
     Stopwatch,
 }
 
 #[derive(clap::Parser)]
+#[clap(about = "A clock app in terminal", long_about = None)]
 pub(crate) struct App {
-    #[clap(short, long, value_parser, arg_enum, default_value = "clock")]
-    pub mode: Mode,
+    #[clap(subcommand)]
+    pub mode: Option<Mode>,
     #[clap(short, long, value_parser = parse_color, default_value = "green")]
     pub color: Color,
-    #[clap(short, long, value_parser = parse_duration, default_value = "5m")]
-    pub duration: Duration,
     #[clap(short, long, value_parser, default_value = "1")]
     pub size: u16,
 
@@ -41,7 +47,8 @@ pub(crate) struct App {
 impl App {
     pub fn init_app(&mut self) {
         let style = Style::default().fg(self.color);
-        match self.mode {
+        let mode = self.mode.as_ref().unwrap_or(&Mode::Clock);
+        match mode {
             Mode::Clock => {
                 self.clock = Some(Clock {
                     size: self.size,
@@ -49,8 +56,8 @@ impl App {
                     long: false,
                 });
             }
-            Mode::Timer => {
-                self.timer = Some(Timer::new(self.duration, self.size, style));
+            Mode::Timer { duration } => {
+                self.timer = Some(Timer::new(duration.to_owned(), self.size, style));
             }
             Mode::Stopwatch => {
                 self.stopwatch = Some(Stopwatch::new(self.size, style));
