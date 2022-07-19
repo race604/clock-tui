@@ -1,4 +1,4 @@
-# clock-tui
+# clock-tui (tclock)
 
 A clock app in terminal. It support the following modes:
 
@@ -15,6 +15,14 @@ A clock app in terminal. It support the following modes:
 ![stopwatch](/assets/demo-stopwatch-mode.gif)
 
 # Usage
+
+## Install
+
+Install excutable by `cargo`:
+
+```shell
+$ cargo install clock-tui
+```
 
 ## Basic usage
 
