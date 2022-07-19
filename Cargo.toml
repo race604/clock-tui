@@ -2,6 +2,12 @@
 name = "clock-tui"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+description = "A clock app in terminal"
+homepage = "https://github.com/race604/clock-tui"
+repository = "https://github.com/race604/clock-tui"
+readme = "README.md"
+authors = ["Race604 <race604@gmail.com>"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -9,7 +15,6 @@ edition = "2021"
 tui = "0.18.0"
 crossterm = "0.24"
 chrono = "0.4"
-chrono-tz = "0.4"
 clap = { version = "3.2.12", features = ["derive"] }
 regex = "1.6.0"
 
