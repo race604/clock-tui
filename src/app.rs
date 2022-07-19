@@ -66,11 +66,11 @@ impl App {
     }
 
     pub fn ui<B: Backend>(&self, f: &mut Frame<B>) {
-        if let Some(w) = self.clock.as_ref() {
+        if let Some(ref w) = self.clock {
             f.render_widget(w, f.size());
-        } else if let Some(w) = self.timer.as_ref() {
+        } else if let Some(ref w) = self.timer {
             f.render_widget(w, f.size());
-        } else if let Some(w) = self.stopwatch.as_ref() {
+        } else if let Some(ref w) = self.stopwatch {
             f.render_widget(w, f.size());
         }
     }
