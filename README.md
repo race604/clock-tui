@@ -16,7 +16,12 @@ A clock app in terminal. It support the following modes:
 
 # Usage
 
-## Help inforamtion
+## Basic usage
+
+```shell
+$ tclock
+```
+Run this command to start a clock, and press `q` to exit.
 
 ```shell
 $ tclock --help
@@ -60,6 +65,18 @@ You can use `-s` or `--size` option to custome clock size, for example:
 
 ```shell
 $ tclock -s 2
+```
+
+* Color
+
+You can use `-c` or `--color` to set clock forground color, for exmaple:
+
+```shell
+# color name
+$ tclock -c yellow
+
+# or hex color
+$ tclock -c '#e63946'
 ```
 
 # License
