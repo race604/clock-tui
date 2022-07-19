@@ -27,7 +27,7 @@ pub(crate) enum Mode {
 }
 
 #[derive(clap::Parser)]
-#[clap(about = "A clock app in terminal", long_about = None)]
+#[clap(name = "tclock", about = "A clock app in terminal", long_about = None)]
 pub(crate) struct App {
     #[clap(subcommand)]
     pub mode: Option<Mode>,
