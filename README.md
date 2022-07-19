@@ -45,11 +45,22 @@ You can press `Space` key to _pause_ and _resume_ the timer.
 ## Run stopwatch
 
 ```shell
-# Start timer for 5 minutes
 $ tclock stopwatch
 ```
 
 You can press `Space` key to _pause_ and _resume_ the stopwatch.
+
+## Customize style
+
+You can customize the styles.
+
+* Size
+
+You can use `-s` or `--size` option to custome clock size, for example:
+
+```shell
+$ tclock -s 2
+```
 
 # License
 

@@ -146,9 +146,9 @@ fn parse_color(s: &str) -> Result<Color, String> {
                 .captures(s)
                 .ok_or_else(|| format!("Invalid color: {}", s))?;
             let hex = cap.get(1).unwrap().as_str();
-            let r = hex[1..3].parse::<u8>().unwrap();
-            let g = hex[3..5].parse::<u8>().unwrap();
-            let b = hex[5..7].parse::<u8>().unwrap();
+            let r = u8::from_str_radix(&hex[0..2], 16).unwrap();
+            let g = u8::from_str_radix(&hex[2..4], 16).unwrap();
+            let b = u8::from_str_radix(&hex[4..], 16).unwrap();
             Ok(Color::Rgb(r, g, b))
         }
     }
