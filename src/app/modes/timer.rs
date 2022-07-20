@@ -59,8 +59,12 @@ impl Timer {
 impl Widget for &Timer {
     fn render(self, area: Rect, buf: &mut Buffer) {
         let time_str = format_duration(self.remaining_time());
-        // println!("{}", time_str);
         let text = BricksText::new(time_str.as_str(), self.size, self.size, self.style);
-        render_centered(area, buf, &text);
+        let footer = if self.is_paused() {
+            Some("PAUSED (press <SPACE> to resume)".to_string())
+        } else {
+            None
+        };
+        render_centered(area, buf, &text, None, footer);
     }
 }

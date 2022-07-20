@@ -1,13 +1,8 @@
-use std::cmp::min;
-
 use chrono::Local;
 use clock_tui::bricks_text::BricksText;
-use tui::{
-    layout::Rect,
-    style::Style,
-    text::Span,
-    widgets::{Paragraph, Widget},
-};
+use tui::{layout::Rect, style::Style, widgets::Widget};
+
+use super::render_centered;
 
 pub(crate) struct Clock {
     pub size: u16,
@@ -28,27 +23,11 @@ impl Widget for &Clock {
         };
         let time_str = time_str.as_str();
         let text = BricksText::new(time_str, self.size, self.size, self.style);
-        let text_size = text.size();
-        let text_area = Rect {
-            x: area.x + (area.width.saturating_sub(text_size.0)) / 2,
-            y: area.y + (area.height.saturating_sub(text_size.1)) / 2,
-            width: min(text_size.0, area.width),
-            height: min(text_size.0, area.height),
+        let header = if self.show_date {
+            Some(now.format("%Y-%m-%d %Z").to_string())
+        } else {
+            None
         };
-        text.render(text_area, buf);
-
-        if self.show_date {
-            let text = now.format("%Y-%m-%d %Z").to_string();
-            let text_len = text.as_str().len() as u16;
-            let paragrahp = Paragraph::new(Span::from(text)).style(Style::default());
-
-            let para_area = Rect {
-                x: area.x + (area.width.saturating_sub(text_len)) / 2,
-                y: text_area.y.saturating_sub(2),
-                width: min(text_len, area.width),
-                height: min(1, area.height),
-            };
-            paragrahp.render(para_area, buf);
-        }
+        render_centered(area, buf, &text, header, None);
     }
 }

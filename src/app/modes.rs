@@ -9,7 +9,13 @@ pub(crate) use clock::Clock;
 use clock_tui::bricks_text::BricksText;
 pub(crate) use stopwatch::Stopwatch;
 pub(crate) use timer::Timer;
-use tui::{buffer::Buffer, layout::Rect, widgets::Widget};
+use tui::{
+    buffer::Buffer,
+    layout::Rect,
+    style::Style,
+    text::Span,
+    widgets::{Paragraph, Widget},
+};
 
 fn format_duration(duration: Duration) -> String {
     let millis = duration.num_milliseconds();
@@ -30,13 +36,44 @@ fn format_duration(duration: Duration) -> String {
     result
 }
 
-fn render_centered(area: Rect, buf: &mut Buffer, text: &BricksText) {
+fn render_centered(
+    area: Rect,
+    buf: &mut Buffer,
+    text: &BricksText,
+    header: Option<String>,
+    footer: Option<String>,
+) {
     let text_size = text.size();
     let text_area = Rect {
         x: area.x + (area.width.saturating_sub(text_size.0)) / 2,
         y: area.y + (area.height.saturating_sub(text_size.1)) / 2,
         width: min(text_size.0, area.width),
-        height: min(text_size.0, area.height),
+        height: min(text_size.1, area.height),
     };
     text.render(text_area, buf);
+
+    let render_text_center = |text: &str, top: u16, buf: &mut Buffer| {
+        let text_len = text.len() as u16;
+        let paragrahp = Paragraph::new(Span::from(text)).style(Style::default());
+
+        let para_area = Rect {
+            x: area.left() + (area.width.saturating_sub(text_len)) / 2,
+            y: top,
+            width: min(text_len, area.width),
+            height: min(1, area.height),
+        };
+        paragrahp.render(para_area, buf);
+    };
+
+    if let Some(text) = header {
+        if area.top() + 2 <= text_area.top() {
+            render_text_center(text.as_str(), text_area.top() - 2, buf);
+        }
+    }
+
+    if let Some(text) = footer {
+        if area.bottom() >= text_area.bottom() + 2 {
+            render_text_center(text.as_str(), text_area.bottom() + 1, buf);
+        }
+    }
 }

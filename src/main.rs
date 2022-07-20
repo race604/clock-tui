@@ -65,7 +65,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     } else {
         false
     };
-    let tick_rate = Duration::from_millis(if low_rate { 20 } else { 200 });
+    let tick_rate = Duration::from_millis(if low_rate { 200 } else { 20 });
     let res = run_app(&mut terminal, &mut app, tick_rate);
 
     // restore terminal
