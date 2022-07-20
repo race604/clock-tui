@@ -38,8 +38,12 @@ pub(crate) enum Mode {
 pub(crate) struct App {
     #[clap(subcommand)]
     pub mode: Option<Mode>,
+    /// Forground color of the clock, possible values are:
+    ///     a) Any one of: Black, Red, Green, Yellow, Blue, Magenta, Cyan, Gray, DarkGray, LightRed, LightGreen, LightYellow, LightBlue, LightMagenta, LightCyan, White.
+    ///     b) Hexadecimal color code: #RRGGBB.
     #[clap(short, long, value_parser = parse_color, default_value = "green")]
     pub color: Color,
+    /// Size of the clock, should be a positive integer (>=1).
     #[clap(short, long, value_parser, default_value = "1")]
     pub size: u16,
 

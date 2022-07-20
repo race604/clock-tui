@@ -67,7 +67,7 @@ You can press `Space` key to _pause_ and _resume_ the stopwatch.
 
 You can customize the styles.
 
-* Size
+### Size
 
 You can use `-s` or `--size` option to custome clock size, for example:
 
@@ -75,12 +75,14 @@ You can use `-s` or `--size` option to custome clock size, for example:
 $ tclock -s 2
 ```
 
-* Color
+### Color
 
 You can use `-c` or `--color` to set clock forground color, for exmaple:
 
 ```shell
-# color name
+# color name, any one of: 
+# Black, Red, Green, Yellow, Blue, Magenta, Cyan, Gray, DarkGray, LightRed,
+# LightGreen, LightYellow, LightBlue, LightMagenta, LightCyan, White
 $ tclock -c yellow
 
 # or hex color
