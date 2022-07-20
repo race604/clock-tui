@@ -12,13 +12,14 @@ use tui::{
 pub(crate) struct Clock {
     pub size: u16,
     pub style: Style,
-    pub long: bool,
+    pub show_date: bool,
+    pub show_millis: bool,
 }
 
 impl Widget for &Clock {
     fn render(self, area: Rect, buf: &mut tui::buffer::Buffer) {
         let now = Local::now();
-        let time_str = if self.long {
+        let time_str = if self.show_millis {
             let mut str = now.format("%H:%M:%S%.3f").to_string();
             str.truncate(str.len() - 2);
             str
@@ -35,16 +36,19 @@ impl Widget for &Clock {
             height: min(text_size.0, area.height),
         };
         text.render(text_area, buf);
-        let text = now.format("%Y-%m-%d %Z").to_string();
-        let text_len = text.as_str().len() as u16;
-        let paragrahp = Paragraph::new(Span::from(text)).style(Style::default());
 
-        let para_area = Rect {
-            x: area.x + (area.width.saturating_sub(text_len)) / 2,
-            y: text_area.y.saturating_sub(2),
-            width: min(text_len, area.width),
-            height: min(1, area.height),
-        };
-        paragrahp.render(para_area, buf);
+        if self.show_date {
+            let text = now.format("%Y-%m-%d %Z").to_string();
+            let text_len = text.as_str().len() as u16;
+            let paragrahp = Paragraph::new(Span::from(text)).style(Style::default());
+
+            let para_area = Rect {
+                x: area.x + (area.width.saturating_sub(text_len)) / 2,
+                y: text_area.y.saturating_sub(2),
+                width: min(text_len, area.width),
+                height: min(1, area.height),
+            };
+            paragrahp.render(para_area, buf);
+        }
     }
 }

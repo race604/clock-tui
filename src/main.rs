@@ -4,6 +4,7 @@ use std::{
     time::{Duration, Instant},
 };
 
+use app::Mode;
 use clap::Parser;
 use crossterm::{
     event::{self, Event, KeyCode},
@@ -59,7 +60,12 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut terminal = Terminal::new(backend)?;
 
     // create app and run it
-    let tick_rate = Duration::from_millis(100);
+    let low_rate = if let Some(Mode::Clock { millis, .. }) = app.mode {
+        !millis
+    } else {
+        false
+    };
+    let tick_rate = Duration::from_millis(if low_rate { 20 } else { 200 });
     let res = run_app(&mut terminal, &mut app, tick_rate);
 
     // restore terminal

@@ -16,7 +16,14 @@ pub(crate) mod modes;
 #[derive(Debug, Subcommand)]
 pub(crate) enum Mode {
     /// The clock mode displays the current time, the default mode.
-    Clock,
+    Clock {
+        /// Do not show date
+        #[clap(short = 'D', long, takes_value = false)]
+        no_date: bool,
+        /// Show milliseconds
+        #[clap(short, long, takes_value = false)]
+        millis: bool,
+    },
     /// The timer mode displays the remaining time until the timer is finished.
     Timer {
         #[clap(short, long, value_parser = parse_duration, default_value = "5m")]
@@ -47,13 +54,17 @@ pub(crate) struct App {
 impl App {
     pub fn init_app(&mut self) {
         let style = Style::default().fg(self.color);
-        let mode = self.mode.as_ref().unwrap_or(&Mode::Clock);
+        let mode = self.mode.as_ref().unwrap_or(&Mode::Clock {
+            no_date: false,
+            millis: false,
+        });
         match mode {
-            Mode::Clock => {
+            Mode::Clock { no_date, millis } => {
                 self.clock = Some(Clock {
                     size: self.size,
                     style,
-                    long: false,
+                    show_date: !no_date.to_owned(),
+                    show_millis: millis.to_owned(),
                 });
             }
             Mode::Timer { duration } => {
