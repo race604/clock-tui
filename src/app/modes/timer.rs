@@ -47,11 +47,7 @@ impl Timer {
     pub(crate) fn remaining_time(&self) -> Duration {
         if let Some(end_at) = self.ended_at {
             let now = Local::now();
-            if end_at <= now {
-                Duration::zero()
-            } else {
-                end_at.signed_duration_since(now)
-            }
+            end_at.signed_duration_since(now)
         } else {
             self.duration
         }
@@ -60,7 +56,17 @@ impl Timer {
 
 impl Widget for &Timer {
     fn render(self, area: Rect, buf: &mut Buffer) {
-        let time_str = format_duration(self.remaining_time(), self.format);
+        let remaining_time = self.remaining_time();
+        let time_str = if remaining_time < Duration::zero() {
+            if remaining_time.num_seconds() % 2 == 0 {
+                return;
+            } else {
+                format_duration(Duration::zero(), self.format)
+            }
+        } else {
+            format_duration(remaining_time, self.format)
+        };
+
         let text = BricksText::new(time_str.as_str(), self.size, self.size, self.style);
         let footer = if self.is_paused() {
             Some("PAUSED (press <SPACE> to resume)".to_string())
