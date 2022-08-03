@@ -8,6 +8,7 @@ use tui::style::Style;
 use tui::Frame;
 
 use self::modes::Clock;
+use self::modes::DurationFormat;
 use self::modes::Stopwatch;
 use self::modes::Timer;
 
@@ -28,6 +29,10 @@ pub(crate) enum Mode {
     Timer {
         #[clap(short, long, value_parser = parse_duration, default_value = "5m")]
         duration: Duration,
+
+        /// Hide milliseconds
+        #[clap(long = "no-millis", takes_value = false)]
+        no_millis: bool,
     },
     /// The stopwatch mode displays the elapsed time since it was started.
     Stopwatch,
@@ -38,7 +43,7 @@ pub(crate) enum Mode {
 pub(crate) struct App {
     #[clap(subcommand)]
     pub mode: Option<Mode>,
-    /// Forground color of the clock, possible values are:
+    /// Foreground color of the clock, possible values are:
     ///     a) Any one of: Black, Red, Green, Yellow, Blue, Magenta, Cyan, Gray, DarkGray, LightRed, LightGreen, LightYellow, LightBlue, LightMagenta, LightCyan, White.
     ///     b) Hexadecimal color code: #RRGGBB.
     #[clap(short, long, value_parser = parse_color, default_value = "green")]
@@ -71,8 +76,16 @@ impl App {
                     show_millis: millis.to_owned(),
                 });
             }
-            Mode::Timer { duration } => {
-                self.timer = Some(Timer::new(duration.to_owned(), self.size, style));
+            Mode::Timer {
+                duration,
+                no_millis,
+            } => {
+                let format = if *no_millis {
+                    DurationFormat::HourMinSec
+                } else {
+                    DurationFormat::HourMinSecDeci
+                };
+                self.timer = Some(Timer::new(duration.to_owned(), self.size, style, format));
             }
             Mode::Stopwatch => {
                 self.stopwatch = Some(Stopwatch::new(self.size, style));
