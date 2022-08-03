@@ -17,7 +17,15 @@ use tui::{
     widgets::{Paragraph, Widget},
 };
 
-fn format_duration(duration: Duration) -> String {
+#[derive(Copy, Clone)]
+pub(crate) enum DurationFormat {
+    /// Hours, minutes, seconds, deciseconds
+    HourMinSecDeci,
+    /// Hours, minutes, seconds
+    HourMinSec,
+}
+
+fn format_duration(duration: Duration, format: DurationFormat) -> String {
     let millis = duration.num_milliseconds();
     let seconds = millis / 1000;
     let minutes = seconds / 60;
@@ -31,7 +39,12 @@ fn format_duration(duration: Duration) -> String {
         result.push_str(&format!("{}:", hours % 24));
     }
     result.push_str(&format!("{}:", minutes % 60));
-    result.push_str(&format!("{:02}.{}", seconds % 60, (millis % 1000) / 100));
+    match format {
+        DurationFormat::HourMinSecDeci => {
+            result.push_str(&format!("{:02}.{}", seconds % 60, (millis % 1000) / 100))
+        }
+        DurationFormat::HourMinSec => result.push_str(&format!("{:02}", seconds % 60)),
+    }
 
     result
 }

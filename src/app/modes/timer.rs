@@ -2,21 +2,23 @@ use chrono::{DateTime, Duration, Local};
 use clock_tui::bricks_text::BricksText;
 use tui::{buffer::Buffer, layout::Rect, style::Style, widgets::Widget};
 
-use super::{format_duration, render_centered};
+use super::{format_duration, render_centered, DurationFormat};
 
 pub struct Timer {
     pub size: u16,
     pub style: Style,
+    format: DurationFormat,
     duration: Duration,
     ended_at: Option<DateTime<Local>>,
 }
 
 impl Timer {
-    pub(crate) fn new(duration: Duration, size: u16, style: Style) -> Self {
+    pub(crate) fn new(duration: Duration, size: u16, style: Style, format: DurationFormat) -> Self {
         Self {
             duration,
             size,
             style,
+            format,
             ended_at: Some(Local::now() + duration),
         }
     }
@@ -58,7 +60,7 @@ impl Timer {
 
 impl Widget for &Timer {
     fn render(self, area: Rect, buf: &mut Buffer) {
-        let time_str = format_duration(self.remaining_time());
+        let time_str = format_duration(self.remaining_time(), self.format);
         let text = BricksText::new(time_str.as_str(), self.size, self.size, self.style);
         let footer = if self.is_paused() {
             Some("PAUSED (press <SPACE> to resume)".to_string())
