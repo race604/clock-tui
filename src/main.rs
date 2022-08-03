@@ -60,10 +60,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut terminal = Terminal::new(backend)?;
 
     // create app and run it
-    let low_rate = if let Some(Mode::Clock { millis, .. }) = app.mode {
-        !millis
-    } else {
-        false
+    let low_rate = match app.mode {
+        Some(Mode::Clock { millis, .. }) => !millis,
+        Some(Mode::Timer { no_millis, .. }) => no_millis,
+        _ => false,
     };
     let tick_rate = Duration::from_millis(if low_rate { 200 } else { 20 });
     let res = run_app(&mut terminal, &mut app, tick_rate);
