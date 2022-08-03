@@ -31,7 +31,7 @@ pub(crate) enum Mode {
         duration: Duration,
 
         /// Hide milliseconds
-        #[clap(long = "no-millis", takes_value = false)]
+        #[clap(long = "no-millis", short = 'M', takes_value = false)]
         no_millis: bool,
     },
     /// The stopwatch mode displays the elapsed time since it was started.
