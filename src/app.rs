@@ -27,12 +27,17 @@ pub(crate) enum Mode {
     },
     /// The timer mode displays the remaining time until the timer is finished.
     Timer {
+        /// Initial duration for timer, value can be 10s for 10 seconds, 1m for 1 minute, etc.
         #[clap(short, long, value_parser = parse_duration, default_value = "5m")]
         duration: Duration,
 
         /// Hide milliseconds
         #[clap(long = "no-millis", short = 'M', takes_value = false)]
         no_millis: bool,
+
+        /// Command to run when the timer ends
+        #[clap(long, short, multiple = true, allow_hyphen_values = true)]
+        execute: Vec<String>,
     },
     /// The stopwatch mode displays the elapsed time since it was started.
     Stopwatch,
@@ -79,13 +84,20 @@ impl App {
             Mode::Timer {
                 duration,
                 no_millis,
+                execute,
             } => {
                 let format = if *no_millis {
                     DurationFormat::HourMinSec
                 } else {
                     DurationFormat::HourMinSecDeci
                 };
-                self.timer = Some(Timer::new(duration.to_owned(), self.size, style, format));
+                self.timer = Some(Timer::new(
+                    duration.to_owned(),
+                    self.size,
+                    style,
+                    format,
+                    execute.to_owned(),
+                ));
             }
             Mode::Stopwatch => {
                 self.stopwatch = Some(Stopwatch::new(self.size, style));
