@@ -55,6 +55,14 @@ The option `-d` or `--duration` to set time, for example `100s`, `5m`, `1h`, etc
 
 You can press `Space` key to _pause_ and _resume_ the timer.
 
+The timer mode also accept additional command to run when the timer ends, for example:
+
+```
+tclock timer -d 25m -e terminal-notifier -title tclock -message "'Time is up!'"
+```
+
+Here we use [terminal-notifier](https://github.com/julienXX/terminal-notifier) to fire a notification when time is up.
+
 ## Run stopwatch
 
 ```shell
