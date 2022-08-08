@@ -94,7 +94,7 @@ impl Widget for &Timer {
                 let result = execute(&self.execute);
                 *self.execute_result.borrow_mut() = Some(result);
             }
-            if remaining_time.num_seconds() % 2 == 0 {
+            if (remaining_time.num_milliseconds()).abs() % 1000 < 400 {
                 return;
             } else {
                 format_duration(Duration::zero(), self.format)

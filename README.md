@@ -99,4 +99,4 @@ $ tclock -c '#e63946'
 
 # License
 
-MIT License.
+MIT License, [LICENSE](./LICENSE) for detail.
