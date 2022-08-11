@@ -13,7 +13,7 @@ impl BrickChar {
     const UNIT_SIZE: Point = Point(3 * Self::H_UNIT, 5 * Self::V_UNIT);
 
     pub(crate) fn size(size: u16) -> Point {
-        Self::UNIT_SIZE.clone() * size
+        Self::UNIT_SIZE * size
     }
 
     pub(crate) fn from(char: char) -> BrickChar {
@@ -219,7 +219,7 @@ impl BrickChar {
         for _ in 0..size {
             let mut p = from;
             for _ in (0..len).step_by(max(step.0, step.1).into()) {
-                if !p.in_area(&area) {
+                if !p.in_area(area) {
                     break;
                 }
                 // println!("p = {:?} area = {:?}", p, area);

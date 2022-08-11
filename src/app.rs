@@ -77,13 +77,17 @@ impl App {
             no_seconds: false,
         });
         match mode {
-            Mode::Clock { no_date, no_seconds, millis } => {
+            Mode::Clock {
+                no_date,
+                no_seconds,
+                millis,
+            } => {
                 self.clock = Some(Clock {
                     size: self.size,
                     style,
-                    show_date: !no_date.to_owned(),
-                    show_millis: millis.to_owned(),
-                    show_secs: !*no_seconds,
+                    show_date: !no_date,
+                    show_millis: *millis,
+                    show_secs: !no_seconds,
                 });
             }
             Mode::Timer {
@@ -97,7 +101,7 @@ impl App {
                     DurationFormat::HourMinSecDeci
                 };
                 self.timer = Some(Timer::new(
-                    duration.to_owned(),
+                    *duration,
                     self.size,
                     style,
                     format,
@@ -162,7 +166,7 @@ fn parse_duration(s: &str) -> Result<Duration, String> {
         "m" => Ok(Duration::minutes(num)),
         "h" => Ok(Duration::hours(num)),
         "d" => Ok(Duration::days(num)),
-        _ => Err(format!("Invalid duration: {}", s).into()),
+        _ => Err(format!("Invalid duration: {}", s)),
     }
 }
 

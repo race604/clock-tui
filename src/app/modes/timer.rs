@@ -66,7 +66,7 @@ impl Timer {
     }
 }
 
-fn execute(execute: &Vec<String>) -> String {
+fn execute(execute: &[String]) -> String {
     let mut cmd = Command::new("sh");
     cmd.arg("-c");
     let cmd_str = execute.join(" ");
@@ -90,7 +90,7 @@ impl Widget for &Timer {
     fn render(self, area: Rect, buf: &mut Buffer) {
         let remaining_time = self.remaining_time();
         let time_str = if remaining_time < Duration::zero() {
-            if self.execute.len() > 0 && self.execute_result.borrow().is_none() {
+            if !self.execute.is_empty() && self.execute_result.borrow().is_none() {
                 let result = execute(&self.execute);
                 *self.execute_result.borrow_mut() = Some(result);
             }
