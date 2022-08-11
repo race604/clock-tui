@@ -61,7 +61,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // create app and run it
     let low_rate = match app.mode {
-        Some(Mode::Clock { millis, .. }) => !millis,
+        Some(Mode::Clock { millis, no_seconds, .. }) => !millis || no_seconds,
         Some(Mode::Timer { no_millis, .. }) => no_millis,
         _ => false,
     };
