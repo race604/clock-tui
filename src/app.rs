@@ -68,6 +68,23 @@ pub(crate) struct App {
     stopwatch: Option<Stopwatch>,
 }
 
+/// Trait for widgets that can be paused
+pub(crate) trait Pause {
+    fn is_paused(&self) -> bool;
+
+    fn pause(&mut self);
+
+    fn resume(&mut self);
+
+    fn toggle_paused(&mut self) {
+        if self.is_paused() {
+            self.resume()
+        } else {
+            self.pause()
+        }
+    }
+}
+
 impl App {
     pub fn init_app(&mut self) {
         let style = Style::default().fg(self.color);
@@ -127,28 +144,16 @@ impl App {
     pub fn on_key(&mut self, key: KeyCode) {
         if let Some(_w) = self.clock.as_mut() {
         } else if let Some(w) = self.timer.as_mut() {
-            match key {
-                KeyCode::Char(' ') => {
-                    if w.is_paused() {
-                        w.resume();
-                    } else {
-                        w.pause();
-                    }
-                }
-                _ => {}
-            }
+            handle_key(w, key);
         } else if let Some(w) = self.stopwatch.as_mut() {
-            match key {
-                KeyCode::Char(' ') => {
-                    if w.is_paused() {
-                        w.resume();
-                    } else {
-                        w.pause();
-                    }
-                }
-                _ => {}
-            }
+            handle_key(w, key);
         }
+    }
+}
+
+fn handle_key<T: Pause>(widget: &mut T, key: KeyCode) {
+    if let KeyCode::Char(' ') = key {
+        widget.toggle_paused()
     }
 }
 

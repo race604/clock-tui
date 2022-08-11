@@ -4,6 +4,8 @@ use chrono::{DateTime, Duration, Local};
 use clock_tui::bricks_text::BricksText;
 use tui::{buffer::Buffer, layout::Rect, style::Style, widgets::Widget};
 
+use crate::app::Pause;
+
 use super::{format_duration, render_centered, DurationFormat};
 
 pub struct Timer {
@@ -32,27 +34,6 @@ impl Timer {
             format,
             ended_at: Some(Local::now() + duration),
             execute_result: RefCell::new(None),
-        }
-    }
-
-    pub(crate) fn is_paused(&self) -> bool {
-        self.ended_at.is_none()
-    }
-
-    pub(crate) fn pause(&mut self) {
-        if let Some(end_at) = self.ended_at {
-            if end_at <= Local::now() {
-                self.duration = Duration::zero();
-            } else {
-                self.duration = end_at - Local::now();
-                self.ended_at = None;
-            }
-        }
-    }
-
-    pub(crate) fn resume(&mut self) {
-        if self.ended_at.is_none() {
-            self.ended_at = Some(Local::now() + self.duration);
         }
     }
 
@@ -110,5 +91,28 @@ impl Widget for &Timer {
             self.execute_result.borrow().clone()
         };
         render_centered(area, buf, &text, None, footer);
+    }
+}
+
+impl Pause for Timer {
+    fn is_paused(&self) -> bool {
+        self.ended_at.is_none()
+    }
+
+    fn pause(&mut self) {
+        if let Some(end_at) = self.ended_at {
+            if end_at <= Local::now() {
+                self.duration = Duration::zero();
+            } else {
+                self.duration = end_at - Local::now();
+                self.ended_at = None;
+            }
+        }
+    }
+
+    fn resume(&mut self) {
+        if self.ended_at.is_none() {
+            self.ended_at = Some(Local::now() + self.duration);
+        }
     }
 }
