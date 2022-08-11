@@ -30,7 +30,7 @@ fn run_app<B: Backend>(
 
         let timeout = tick_rate
             .checked_sub(last_tick.elapsed())
-            .unwrap_or(Duration::from_secs(0));
+            .unwrap_or(Duration::ZERO);
         if event::poll(timeout)? {
             if let Event::Key(key) = event::read()? {
                 match key.code {
@@ -61,7 +61,9 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // create app and run it
     let low_rate = match app.mode {
-        Some(Mode::Clock { millis, no_seconds, .. }) => !millis || no_seconds,
+        Some(Mode::Clock {
+            millis, no_seconds, ..
+        }) => !millis || no_seconds,
         Some(Mode::Timer { no_millis, .. }) => no_millis,
         _ => false,
     };

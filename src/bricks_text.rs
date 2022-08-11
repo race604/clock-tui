@@ -30,7 +30,7 @@ impl BricksText {
 
 impl Widget for &BricksText {
     fn render(self, area: tui::layout::Rect, buf: &mut tui::buffer::Buffer) {
-        let mut area = area.clone();
+        let mut area = area;
         for char in self.text.chars() {
             let Point(w, _) = BrickChar::size(self.size);
             let char = BrickChar::from(char);
