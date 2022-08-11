@@ -9,6 +9,7 @@ pub(crate) struct Clock {
     pub style: Style,
     pub show_date: bool,
     pub show_millis: bool,
+    pub show_secs: bool,
 }
 
 impl Widget for &Clock {
@@ -18,8 +19,10 @@ impl Widget for &Clock {
             let mut str = now.format("%H:%M:%S%.3f").to_string();
             str.truncate(str.len() - 2);
             str
-        } else {
+        } else if self.show_secs {
             now.format("%H:%M:%S").to_string()
+        } else {
+            now.format("%H:%M").to_string()
         };
         let time_str = time_str.as_str();
         let text = BricksText::new(time_str, self.size, self.size, self.style);

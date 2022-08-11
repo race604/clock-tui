@@ -21,6 +21,9 @@ pub(crate) enum Mode {
         /// Do not show date
         #[clap(short = 'D', long, takes_value = false)]
         no_date: bool,
+        /// Do not show seconds
+        #[clap(short = 'S', long, takes_value = false)]
+        no_seconds: bool,
         /// Show milliseconds
         #[clap(short, long, takes_value = false)]
         millis: bool,
@@ -71,14 +74,16 @@ impl App {
         let mode = self.mode.as_ref().unwrap_or(&Mode::Clock {
             no_date: false,
             millis: false,
+            no_seconds: false,
         });
         match mode {
-            Mode::Clock { no_date, millis } => {
+            Mode::Clock { no_date, no_seconds, millis } => {
                 self.clock = Some(Clock {
                     size: self.size,
                     style,
                     show_date: !no_date.to_owned(),
                     show_millis: millis.to_owned(),
+                    show_secs: !*no_seconds,
                 });
             }
             Mode::Timer {
