@@ -38,6 +38,10 @@ pub(crate) enum Mode {
         #[clap(long = "no-millis", short = 'M', takes_value = false)]
         no_millis: bool,
 
+        /// Start the timer paused
+        #[clap(long = "paused", short = 'P', takes_value = false)]
+        paused: bool,
+
         /// Command to run when the timer ends
         #[clap(long, short, multiple = true, allow_hyphen_values = true)]
         execute: Vec<String>,
@@ -110,6 +114,7 @@ impl App {
             Mode::Timer {
                 duration,
                 no_millis,
+                paused,
                 execute,
             } => {
                 let format = if *no_millis {
@@ -122,6 +127,7 @@ impl App {
                     self.size,
                     style,
                     format,
+                    *paused,
                     execute.to_owned(),
                 ));
             }
