@@ -24,6 +24,7 @@ impl Timer {
         size: u16,
         style: Style,
         format: DurationFormat,
+        paused: bool,
         execute: Vec<String>,
     ) -> Self {
         Self {
@@ -32,7 +33,7 @@ impl Timer {
             execute,
             style,
             format,
-            ended_at: Some(Local::now() + duration),
+            ended_at: (!paused).then(|| Local::now() + duration),
             execute_result: RefCell::new(None),
         }
     }
