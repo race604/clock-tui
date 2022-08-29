@@ -1,4 +1,10 @@
+use chrono::DateTime;
 use chrono::Duration;
+use chrono::Local;
+use chrono::NaiveDate;
+use chrono::NaiveDateTime;
+use chrono::NaiveTime;
+use chrono::TimeZone;
 use clap::Subcommand;
 use crossterm::event::KeyCode;
 use regex::Regex;
@@ -8,6 +14,7 @@ use tui::style::Style;
 use tui::Frame;
 
 use self::modes::Clock;
+use self::modes::Countdown;
 use self::modes::DurationFormat;
 use self::modes::Stopwatch;
 use self::modes::Timer;
@@ -48,6 +55,24 @@ pub(crate) enum Mode {
     },
     /// The stopwatch mode displays the elapsed time since it was started.
     Stopwatch,
+    /// The countdown timer mode shows the duration to a specific time
+    Countdown {
+        /// The target time to countdown to, eg. "2023-01-01", or "20:00"
+        #[clap(long, short, value_parser = parse_datetime)]
+        time: DateTime<Local>,
+
+        /// Title or description for countdown show in header
+        #[clap(long, short = 'T')]
+        title: Option<String>,
+
+        /// Continue to countdown after pass the target time
+        #[clap(long = "continue", short = 'c', takes_value = false)]
+        continue_on_zero: bool,
+
+        /// Reverse the countdown, a.k.a. countup
+        #[clap(long, short, takes_value = false)]
+        reverse: bool,
+    },
 }
 
 #[derive(clap::Parser)]
@@ -70,6 +95,8 @@ pub(crate) struct App {
     timer: Option<Timer>,
     #[clap(skip)]
     stopwatch: Option<Stopwatch>,
+    #[clap(skip)]
+    countdown: Option<Countdown>,
 }
 
 /// Trait for widgets that can be paused
@@ -134,6 +161,22 @@ impl App {
             Mode::Stopwatch => {
                 self.stopwatch = Some(Stopwatch::new(self.size, style));
             }
+            Mode::Countdown {
+                time,
+                title,
+                continue_on_zero,
+                reverse,
+            } => {
+                self.countdown = Some(Countdown {
+                    size: self.size,
+                    style,
+                    time: *time,
+                    title: title.to_owned(),
+                    continue_on_zero: *continue_on_zero,
+                    reverse: *reverse,
+                    format: DurationFormat::HourMinSec,
+                })
+            }
         }
     }
 
@@ -143,6 +186,8 @@ impl App {
         } else if let Some(ref w) = self.timer {
             f.render_widget(w, f.size());
         } else if let Some(ref w) = self.stopwatch {
+            f.render_widget(w, f.size());
+        } else if let Some(ref w) = self.countdown {
             f.render_widget(w, f.size());
         }
     }
@@ -212,4 +257,33 @@ fn parse_color(s: &str) -> Result<Color, String> {
             Ok(Color::Rgb(r, g, b))
         }
     }
+}
+
+fn parse_datetime(s: &str) -> Result<DateTime<Local>, String> {
+    let s = s.trim();
+    let today = Local::today();
+
+    let time = NaiveTime::parse_from_str(s, "%H:%M:%S");
+    if time.is_ok() {
+        let time = NaiveDateTime::new(today.naive_local(), time.unwrap());
+        return Ok(Local.from_local_datetime(&time).unwrap());
+    }
+
+    let date = NaiveDate::parse_from_str(s, "%Y-%m-%d");
+    if date.is_ok() {
+        let time = NaiveDateTime::new(date.unwrap(), NaiveTime::from_hms(0, 0, 0));
+        return Ok(Local.from_local_datetime(&time).unwrap());
+    }
+
+    let date_time = NaiveDateTime::parse_from_str(s, "%Y-%m-%d %H:%M:%S");
+    if date_time.is_ok() {
+        return Ok(Local.from_local_datetime(&date_time.unwrap()).unwrap());
+    }
+
+    let rfc_time = DateTime::parse_from_rfc3339(s);
+    if rfc_time.is_ok() {
+        return Ok(rfc_time.unwrap().with_timezone(&Local));
+    }
+
+    return Err("Invalid time format".to_string());
 }

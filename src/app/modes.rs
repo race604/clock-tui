@@ -1,4 +1,5 @@
 mod clock;
+mod countdown;
 mod stopwatch;
 mod timer;
 
@@ -7,6 +8,7 @@ use std::cmp::min;
 use chrono::Duration;
 pub(crate) use clock::Clock;
 use clock_tui::bricks_text::BricksText;
+pub(crate) use countdown::Countdown;
 pub(crate) use stopwatch::Stopwatch;
 pub(crate) use timer::Timer;
 use tui::{
@@ -26,12 +28,18 @@ pub(crate) enum DurationFormat {
 }
 
 fn format_duration(duration: Duration, format: DurationFormat) -> String {
+    let is_neg = duration < Duration::zero();
+    let duration = if is_neg { -duration } else { duration };
+
     let millis = duration.num_milliseconds();
     let seconds = millis / 1000;
     let minutes = seconds / 60;
     let hours = minutes / 60;
     let days = hours / 24;
     let mut result = String::new();
+    if is_neg {
+        result.push('-');
+    }
     if days > 0 {
         result.push_str(&format!("{}:", days));
     }
