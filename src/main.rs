@@ -65,6 +65,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             millis, no_seconds, ..
         }) => !millis || no_seconds,
         Some(Mode::Timer { no_millis, .. }) => no_millis,
+        Some(Mode::Countdown { millis, .. }) => !millis,
         _ => false,
     };
     let tick_rate = Duration::from_millis(if low_rate { 200 } else { 20 });

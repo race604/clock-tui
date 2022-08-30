@@ -72,6 +72,10 @@ pub(crate) enum Mode {
         /// Reverse the countdown, a.k.a. countup
         #[clap(long, short, takes_value = false)]
         reverse: bool,
+
+        /// Show milliseconds
+        #[clap(short, long, takes_value = false)]
+        millis: bool,
     },
 }
 
@@ -166,6 +170,7 @@ impl App {
                 title,
                 continue_on_zero,
                 reverse,
+                millis,
             } => {
                 self.countdown = Some(Countdown {
                     size: self.size,
@@ -174,7 +179,11 @@ impl App {
                     title: title.to_owned(),
                     continue_on_zero: *continue_on_zero,
                     reverse: *reverse,
-                    format: DurationFormat::HourMinSec,
+                    format: if *millis {
+                        DurationFormat::HourMinSecDeci
+                    } else {
+                        DurationFormat::HourMinSec
+                    },
                 })
             }
         }
