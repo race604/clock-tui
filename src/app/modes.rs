@@ -47,9 +47,6 @@ fn format_duration(duration: Duration, format: DurationFormat) -> String {
         }
     }
 
-    if is_neg {
-        result.push('-');
-    }
     if days > 0 {
         let _ = write!(result, "{}:", days);
     }
@@ -59,6 +56,10 @@ fn format_duration(duration: Duration, format: DurationFormat) -> String {
     }
     append_number(&mut result, minutes % 60);
     result.push(':');
+
+    if is_neg {
+        result.insert(0, '-');
+    }
     match format {
         DurationFormat::HourMinSecDeci => {
             let _ = write!(result, "{:02}.{}", seconds % 60, (millis % 1000) / 100);

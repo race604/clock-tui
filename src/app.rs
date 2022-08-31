@@ -272,6 +272,12 @@ fn parse_datetime(s: &str) -> Result<DateTime<Local>, String> {
     let s = s.trim();
     let today = Local::today();
 
+    let time = NaiveTime::parse_from_str(s, "%H:%M");
+    if time.is_ok() {
+        let time = NaiveDateTime::new(today.naive_local(), time.unwrap());
+        return Ok(Local.from_local_datetime(&time).unwrap());
+    }
+
     let time = NaiveTime::parse_from_str(s, "%H:%M:%S");
     if time.is_ok() {
         let time = NaiveDateTime::new(today.naive_local(), time.unwrap());
