@@ -14,6 +14,10 @@ A clock app in terminal. It support the following modes:
 
 ![stopwatch](/assets/demo-stopwatch-mode.gif)
 
+## Countdown
+
+![countdown](/assets/demo-countdown-mode.gif)
+
 # Usage
 
 ## Install
@@ -31,8 +35,13 @@ $ tclock
 ```
 Run this command to start a clock, and press `q` to exit.
 
+You can always use `-h` or `--help` to show help message, for exmaple
+
 ```shell
 $ tclock --help
+
+# or
+$ tclock clock -h
 ```
 
 ## Clock mode, this it the default mode
@@ -43,6 +52,8 @@ $ tclock clock
 # Or just run
 $ tclock
 ```
+
+For more details, run `tclock clock -h` to show usage.
 
 ## Run timer
 
@@ -63,13 +74,27 @@ tclock timer -d 25m -e terminal-notifier -title tclock -message "'Time is up!'"
 
 Here we use [terminal-notifier](https://github.com/julienXX/terminal-notifier) to fire a notification when time is up.
 
+For more details, run `tclock timer -h` to show usage.
+
 ## Run stopwatch
 
 ```shell
 $ tclock stopwatch
 ```
 
-You can press `Space` key to _pause_ and _resume_ the stopwatch.
+For more details, run `tclock stopwatch -h` to show usage.
+
+## Run countdown
+
+```shell
+$ tclock countdown --time 2023-01-01 --title 'New Year 2023'`
+```
+
+You can use `-t` or `--time` to specify time, for example: `2023-01-01`, `20:00`, `'2022-12-25 20:00:00'` or `2022-12-25T20:00:00-04:00`.
+
+You can use `-r` or `--reverse` to run in count-up mode, it counts up duration since the specific time.
+
+For more details, run `tclock countdown -h` to show usage.
 
 ## Customize style
 

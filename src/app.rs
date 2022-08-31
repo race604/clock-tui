@@ -57,7 +57,7 @@ pub(crate) enum Mode {
     Stopwatch,
     /// The countdown timer mode shows the duration to a specific time
     Countdown {
-        /// The target time to countdown to, eg. "2023-01-01", or "20:00"
+        /// The target time to countdown to, eg. "2023-01-01", "20:00", "2022-12-25 20:00:00" or "2022-12-25T20:00:00-04:00"
         #[clap(long, short, value_parser = parse_datetime)]
         time: DateTime<Local>,
 
