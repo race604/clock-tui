@@ -4,6 +4,7 @@ mod stopwatch;
 mod timer;
 
 use std::cmp::min;
+use std::fmt::Write as _;
 
 use chrono::Duration;
 pub(crate) use clock::Clock;
@@ -37,21 +38,34 @@ fn format_duration(duration: Duration, format: DurationFormat) -> String {
     let hours = minutes / 60;
     let days = hours / 24;
     let mut result = String::new();
+
+    fn append_number(s: &mut String, num: i64) {
+        if s.is_empty() {
+            let _ = write!(s, "{}", num);
+        } else {
+            let _ = write!(s, "{:02}", num);
+        }
+    }
+
     if is_neg {
         result.push('-');
     }
     if days > 0 {
-        result.push_str(&format!("{}:", days));
+        let _ = write!(result, "{}:", days);
     }
     if hours > 0 {
-        result.push_str(&format!("{}:", hours % 24));
+        append_number(&mut result, hours % 24);
+        result.push(':');
     }
-    result.push_str(&format!("{}:", minutes % 60));
+    append_number(&mut result, minutes % 60);
+    result.push(':');
     match format {
         DurationFormat::HourMinSecDeci => {
-            result.push_str(&format!("{:02}.{}", seconds % 60, (millis % 1000) / 100))
+            let _ = write!(result, "{:02}.{}", seconds % 60, (millis % 1000) / 100);
         }
-        DurationFormat::HourMinSec => result.push_str(&format!("{:02}", seconds % 60)),
+        DurationFormat::HourMinSec => {
+            let _ = write!(result, "{:02}", seconds % 60);
+        }
     }
 
     result
