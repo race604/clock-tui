@@ -249,11 +249,11 @@ fn parse_color(s: &str) -> Result<Color, String> {
         "gray" => Ok(Color::Gray),
         "darkgray" => Ok(Color::DarkGray),
         "lightred" => Ok(Color::LightRed),
-        "lightGreen" => Ok(Color::LightGreen),
-        "lightYellow" => Ok(Color::LightYellow),
-        "lightBlue" => Ok(Color::LightBlue),
-        "lightMagenta" => Ok(Color::LightMagenta),
-        "lightCyan" => Ok(Color::LightCyan),
+        "lightgreen" => Ok(Color::LightGreen),
+        "lightyellow" => Ok(Color::LightYellow),
+        "lightblue" => Ok(Color::LightBlue),
+        "lightmagenta" => Ok(Color::LightMagenta),
+        "lightcyan" => Ok(Color::LightCyan),
         "white" => Ok(Color::White),
         s => {
             let cap = reg
