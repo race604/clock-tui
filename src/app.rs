@@ -273,32 +273,32 @@ fn parse_datetime(s: &str) -> Result<DateTime<Local>, String> {
     let today = Local::today();
 
     let time = NaiveTime::parse_from_str(s, "%H:%M");
-    if time.is_ok() {
-        let time = NaiveDateTime::new(today.naive_local(), time.unwrap());
+    if let Ok(time) = time {
+        let time = NaiveDateTime::new(today.naive_local(), time);
         return Ok(Local.from_local_datetime(&time).unwrap());
     }
 
     let time = NaiveTime::parse_from_str(s, "%H:%M:%S");
-    if time.is_ok() {
-        let time = NaiveDateTime::new(today.naive_local(), time.unwrap());
+    if let Ok(time) = time {
+        let time = NaiveDateTime::new(today.naive_local(), time);
         return Ok(Local.from_local_datetime(&time).unwrap());
     }
 
     let date = NaiveDate::parse_from_str(s, "%Y-%m-%d");
-    if date.is_ok() {
-        let time = NaiveDateTime::new(date.unwrap(), NaiveTime::from_hms(0, 0, 0));
+    if let Ok(date) = date {
+        let time = NaiveDateTime::new(date, NaiveTime::from_hms(0, 0, 0));
         return Ok(Local.from_local_datetime(&time).unwrap());
     }
 
     let date_time = NaiveDateTime::parse_from_str(s, "%Y-%m-%d %H:%M:%S");
-    if date_time.is_ok() {
-        return Ok(Local.from_local_datetime(&date_time.unwrap()).unwrap());
+    if let Ok(date_time) = date_time {
+        return Ok(Local.from_local_datetime(&date_time).unwrap());
     }
 
     let rfc_time = DateTime::parse_from_rfc3339(s);
-    if rfc_time.is_ok() {
-        return Ok(rfc_time.unwrap().with_timezone(&Local));
+    if let Ok(rfc_time) = rfc_time {
+        return Ok(rfc_time.with_timezone(&Local));
     }
 
-    return Err("Invalid time format".to_string());
+    Err("Invalid time format".to_string())
 }
