@@ -4,7 +4,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-use app::Mode;
+use clock_tui::app::Mode;
 use clap::Parser;
 use crossterm::{
     event::{self, Event, KeyCode},
@@ -16,11 +16,11 @@ use tui::{
     Terminal,
 };
 
-mod app;
+use clock_tui::app::App;
 
 fn run_app<B: Backend>(
     terminal: &mut Terminal<B>,
-    app: &mut app::App,
+    app: &mut App,
     tick_rate: Duration,
 ) -> io::Result<()> {
     let mut last_tick = Instant::now();
@@ -49,7 +49,7 @@ fn run_app<B: Backend>(
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let mut app = app::App::parse();
+    let mut app = App::parse();
     app.init_app();
 
     // setup terminal
