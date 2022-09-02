@@ -20,10 +20,10 @@ use self::modes::DurationFormat;
 use self::modes::Stopwatch;
 use self::modes::Timer;
 
-pub(crate) mod modes;
+pub mod modes;
 
 #[derive(Debug, Subcommand)]
-pub(crate) enum Mode {
+pub enum Mode {
     /// The clock mode displays the current time, the default mode.
     Clock {
         /// Custome timezone, for example "America/New_York", use local timezone if not specificed
@@ -85,7 +85,7 @@ pub(crate) enum Mode {
 
 #[derive(clap::Parser)]
 #[clap(name = "tclock", about = "A clock app in terminal", long_about = None)]
-pub(crate) struct App {
+pub struct App {
     #[clap(subcommand)]
     pub mode: Option<Mode>,
     /// Foreground color of the clock, possible values are:

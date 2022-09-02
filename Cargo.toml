@@ -19,7 +19,11 @@ clap = { version = "3.2.12", features = ["derive"] }
 regex = "1.6.0"
 chrono-tz = { version = "0.6.3", features = ["serde"] }
 
+[lib]
+name = "clock_tui"
+path = "src/lib.rs"
+
 [[bin]]
-bench = false
-path = "src/main.rs"
 name = "tclock"
+path = "src/bin/main.rs"
+bench = false
