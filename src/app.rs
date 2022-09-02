@@ -5,6 +5,7 @@ use chrono::NaiveDate;
 use chrono::NaiveDateTime;
 use chrono::NaiveTime;
 use chrono::TimeZone;
+use chrono_tz::Tz;
 use clap::Subcommand;
 use crossterm::event::KeyCode;
 use regex::Regex;
@@ -25,6 +26,9 @@ pub(crate) mod modes;
 pub(crate) enum Mode {
     /// The clock mode displays the current time, the default mode.
     Clock {
+        /// Custome timezone, for example "America/New_York", use local timezone if not specificed
+        #[clap(short = 'z', long, value_parser=parse_timezone)]
+        timezone: Option<Tz>,
         /// Do not show date
         #[clap(short = 'D', long, takes_value = false)]
         no_date: bool,
@@ -127,12 +131,14 @@ impl App {
             no_date: false,
             millis: false,
             no_seconds: false,
+            timezone: None,
         });
         match mode {
             Mode::Clock {
                 no_date,
                 no_seconds,
                 millis,
+                timezone,
             } => {
                 self.clock = Some(Clock {
                     size: self.size,
@@ -140,6 +146,7 @@ impl App {
                     show_date: !no_date,
                     show_millis: *millis,
                     show_secs: !no_seconds,
+                    timezone: *timezone,
                 });
             }
             Mode::Timer {
@@ -301,4 +308,8 @@ fn parse_datetime(s: &str) -> Result<DateTime<Local>, String> {
     }
 
     Err("Invalid time format".to_string())
+}
+
+fn parse_timezone(s: &str) -> Result<Tz, String> {
+    s.parse()
 }
