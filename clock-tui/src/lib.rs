@@ -1,2 +1,2 @@
 pub mod app;
-pub mod bricks_text;
+pub mod clock_text;

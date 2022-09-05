@@ -1,10 +1,10 @@
-use clap::{IntoApp, ArgEnum};
-use clap_complete::{Shell, generate_to};
+use clap::{ArgEnum, IntoApp};
+use clap_complete::{generate_to, Shell};
 use clap_mangen::Man;
 use clock_tui::app::App;
 use std::fs::File;
 use std::io::Result;
-use std::path::{PathBuf, Path};
+use std::path::{Path, PathBuf};
 use std::{env, fs};
 
 const BIN_NAME: &str = "tclock";
