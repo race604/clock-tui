@@ -1,5 +1,5 @@
 use chrono::{DateTime, Duration, Local};
-use crate::bricks_text::BricksText;
+use crate::clock_text::BricksText;
 use tui::{style::Style, widgets::Widget};
 
 use super::{format_duration, render_centered, DurationFormat};

@@ -8,7 +8,7 @@ use std::fmt::Write as _;
 
 use chrono::Duration;
 pub(crate) use clock::Clock;
-use crate::bricks_text::BricksText;
+use crate::clock_text::BricksText;
 pub(crate) use countdown::Countdown;
 pub(crate) use stopwatch::Stopwatch;
 pub(crate) use timer::Timer;
