@@ -1,6 +1,6 @@
 use std::cmp::min;
 
-use tui::{layout::Rect, style::Style, buffer::Buffer};
+use tui::{buffer::Buffer, layout::Rect, style::Style};
 
 use super::Font;
 use crate::clock_text::point::Point;
@@ -16,7 +16,7 @@ impl Bricks {
 
     /// each row is represented with a vector of numbers:
     ///   the odd indexed items represent the lenght of "off",
-    ///   the even indexed items represent the lenght of "on". 
+    ///   the even indexed items represent the lenght of "on".
     /// For exmaple:
     ///   vec![0, 6] is  "██████"
     ///   vec![2, 2] is  "  ██"
@@ -63,14 +63,7 @@ impl Bricks {
 }
 
 impl Font for Bricks {
-    fn render(
-        &self,
-        char: char,
-        size: u16,
-        style: Style,
-        area: Rect,
-        buf: &mut Buffer,
-    ) {
+    fn render(&self, char: char, size: u16, style: Style, area: Rect, buf: &mut Buffer) {
         let mut render_matrix = |mat: [Vec<u16>; 5]| {
             Bricks::draw_matrix(mat, size, style, &area, buf);
         };
@@ -83,27 +76,9 @@ impl Font for Bricks {
                 vec![0, 2, 2, 2],
                 vec![0, 6],
             ]),
-            '1' => render_matrix([
-                vec![0, 4],
-                vec![2, 2],
-                vec![2, 2],
-                vec![2, 2],
-                vec![0, 6],
-            ]),
-            '2' => render_matrix([
-                vec![0, 6],
-                vec![4, 2],
-                vec![0, 6],
-                vec![0, 2],
-                vec![0, 6],
-            ]),
-            '3' => render_matrix([
-                vec![0, 6],
-                vec![4, 2],
-                vec![0, 6],
-                vec![4, 2],
-                vec![0, 6],
-            ]),
+            '1' => render_matrix([vec![0, 4], vec![2, 2], vec![2, 2], vec![2, 2], vec![0, 6]]),
+            '2' => render_matrix([vec![0, 6], vec![4, 2], vec![0, 6], vec![0, 2], vec![0, 6]]),
+            '3' => render_matrix([vec![0, 6], vec![4, 2], vec![0, 6], vec![4, 2], vec![0, 6]]),
             '4' => render_matrix([
                 vec![0, 2, 2, 2],
                 vec![0, 2, 2, 2],
@@ -111,13 +86,7 @@ impl Font for Bricks {
                 vec![4, 2],
                 vec![4, 2],
             ]),
-            '5' => render_matrix([
-                vec![0, 6],
-                vec![0, 2],
-                vec![0, 6],
-                vec![4, 2],
-                vec![0, 6],
-            ]),
+            '5' => render_matrix([vec![0, 6], vec![0, 2], vec![0, 6], vec![4, 2], vec![0, 6]]),
             '6' => render_matrix([
                 vec![0, 6],
                 vec![0, 2],
@@ -125,13 +94,7 @@ impl Font for Bricks {
                 vec![0, 2, 2, 2],
                 vec![0, 6],
             ]),
-            '7' => render_matrix([
-                vec![0, 6],
-                vec![4, 2],
-                vec![4, 2],
-                vec![4, 2],
-                vec![4, 2],
-            ]),
+            '7' => render_matrix([vec![0, 6], vec![4, 2], vec![4, 2], vec![4, 2], vec![4, 2]]),
             '8' => render_matrix([
                 vec![0, 6],
                 vec![0, 2, 2, 2],
@@ -146,27 +109,9 @@ impl Font for Bricks {
                 vec![4, 2],
                 vec![0, 6],
             ]),
-            ':' => render_matrix([
-                vec![],
-                vec![2, 2],
-                vec![],
-                vec![2, 2],
-                vec![],
-            ]),
-            '.' => render_matrix([
-                vec![],
-                vec![],
-                vec![],
-                vec![],
-                vec![2, 2],
-            ]),
-            '-' => render_matrix([
-                vec![],
-                vec![],
-                vec![0, 6],
-                vec![],
-                vec![],
-            ]),
+            ':' => render_matrix([vec![], vec![2, 2], vec![], vec![2, 2], vec![]]),
+            '.' => render_matrix([vec![], vec![], vec![], vec![], vec![2, 2]]),
+            '-' => render_matrix([vec![], vec![], vec![0, 6], vec![], vec![]]),
             _ => {}
         }
     }

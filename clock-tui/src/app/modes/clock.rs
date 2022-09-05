@@ -1,6 +1,6 @@
+use crate::clock_text::BricksText;
 use chrono::{Local, Utc};
 use chrono_tz::Tz;
-use crate::clock_text::BricksText;
 use tui::{layout::Rect, style::Style, widgets::Widget};
 
 use super::render_centered;

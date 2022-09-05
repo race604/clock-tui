@@ -1,7 +1,7 @@
 use tui::{style::Style, widgets::Widget};
 
-use self::font::Font;
 use self::font::bricks::Bricks;
+use self::font::Font;
 use self::point::Point;
 
 mod font;
@@ -34,10 +34,10 @@ impl BricksText {
 impl Widget for &BricksText {
     fn render(self, area: tui::layout::Rect, buf: &mut tui::buffer::Buffer) {
         let mut area = area;
-        let font = Bricks{};
+        let font = Bricks {};
         for char in self.text.chars() {
             let Point(w, _) = Bricks::size(self.size);
-            font.render(char, self.size,  self.style, area, buf);
+            font.render(char, self.size, self.style, area, buf);
             let l = w + self.space;
             area.x += l;
             area.width = area.width.saturating_sub(l);

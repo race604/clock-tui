@@ -1,7 +1,7 @@
 use std::{cell::RefCell, process::Command};
 
-use chrono::{DateTime, Duration, Local};
 use crate::clock_text::BricksText;
+use chrono::{DateTime, Duration, Local};
 use tui::{buffer::Buffer, layout::Rect, style::Style, widgets::Widget};
 
 use crate::app::Pause;

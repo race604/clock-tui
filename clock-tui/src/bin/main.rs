@@ -4,8 +4,8 @@ use std::{
     time::{Duration, Instant},
 };
 
-use clock_tui::app::Mode;
 use clap::Parser;
+use clock_tui::app::Mode;
 use crossterm::{
     event::{self, Event, KeyCode},
     execute,
