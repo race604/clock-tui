@@ -5,14 +5,12 @@ use tui::{buffer::Buffer, layout::Rect, style::Style};
 use super::Font;
 use crate::clock_text::point::Point;
 
-pub struct Bricks;
+pub struct Bricks {
+    pub size: u16,
+}
 
 impl Bricks {
     const UNIT_SIZE: Point = Point(6, 5);
-
-    pub(crate) fn size(size: u16) -> Point {
-        Self::UNIT_SIZE * size
-    }
 
     /// each row is represented with a vector of numbers:
     ///   the odd indexed items represent the lenght of "off",
@@ -63,7 +61,12 @@ impl Bricks {
 }
 
 impl Font for Bricks {
-    fn render(&self, char: char, size: u16, style: Style, area: Rect, buf: &mut Buffer) {
+    fn size(&self) -> Point {
+        Self::UNIT_SIZE * self.size
+    }
+
+    fn render(&self, char: char, style: Style, area: Rect, buf: &mut Buffer) {
+        let size = self.size;
         let mut render_matrix = |mat: [Vec<u16>; 5]| {
             Bricks::draw_matrix(mat, size, style, &area, buf);
         };
