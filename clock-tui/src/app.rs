@@ -42,8 +42,17 @@ pub enum Mode {
     /// The timer mode displays the remaining time until the timer is finished.
     Timer {
         /// Initial duration for timer, value can be 10s for 10 seconds, 1m for 1 minute, etc.
-        #[clap(short, long, value_parser = parse_duration, default_value = "5m")]
-        duration: Duration,
+        /// Also accept mulitple duration value and run the timers sequentially, eg. 25m 5m
+        #[clap(short, long="duration", value_parser = parse_duration, min_values=1, default_value = "5m")]
+        durations: Vec<Duration>,
+
+        /// Set the title for the timer, also accept mulitple titles for each durations correspondingly
+        #[clap(short, long = "title", min_values = 0)]
+        titles: Vec<String>,
+
+        /// Restart the timer when timer is over
+        #[clap(long, short, takes_value = false)]
+        repeat: bool,
 
         /// Hide milliseconds
         #[clap(long = "no-millis", short = 'M', takes_value = false)]
@@ -150,7 +159,9 @@ impl App {
                 });
             }
             Mode::Timer {
-                duration,
+                durations,
+                titles,
+                repeat,
                 no_millis,
                 paused,
                 execute,
@@ -161,9 +172,11 @@ impl App {
                     DurationFormat::HourMinSecDeci
                 };
                 self.timer = Some(Timer::new(
-                    *duration,
                     self.size,
                     style,
+                    durations.to_owned(),
+                    titles.to_owned(),
+                    *repeat,
                     format,
                     *paused,
                     execute.to_owned(),
