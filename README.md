@@ -4,25 +4,25 @@ A clock app in terminal. It support the following modes:
 
 ## Clock
 
-![clock](/assets/demo-clock-mode.gif)
+![clock](./assets/demo-clock-mode.gif)
 
 ## Timer
 
-![timer](/assets/demo-timer-mode.gif)
+![timer](./assets/demo-timer-mode.gif)
 
 ## Stopwatch
 
-![stopwatch](/assets/demo-stopwatch-mode.gif)
+![stopwatch](./assets/demo-stopwatch-mode.gif)
 
 ## Countdown
 
-![countdown](/assets/demo-countdown-mode.gif)
+![countdown](./assets/demo-countdown-mode.gif)
 
 # Usage
 
 ## Install
 
-Install excutable by `cargo`:
+Install executable by `cargo`:
 
 ```shell
 $ cargo install clock-tui
