@@ -15,6 +15,7 @@ pub struct Timer {
     pub durations: Vec<Duration>,
     pub titles: Vec<String>,
     pub execute: Vec<String>,
+    auto_quit: bool,
     format: DurationFormat,
     passed: Duration,
     started_at: Option<DateTime<Local>>,
@@ -31,6 +32,7 @@ impl Timer {
         repeat: bool,
         format: DurationFormat,
         paused: bool,
+        auto_quit: bool,
         execute: Vec<String>,
     ) -> Self {
         Self {
@@ -40,6 +42,7 @@ impl Timer {
             titles,
             repeat,
             execute,
+            auto_quit,
             format,
             passed: Duration::zero(),
             started_at: (!paused).then(Local::now),
@@ -65,6 +68,10 @@ impl Timer {
         }
 
         (next_checkpoint - total_passed, idx)
+    }
+
+    pub(crate) fn is_finished(&self) -> bool {
+        return self.auto_quit && !self.execute_result.borrow().is_none();
     }
 }
 
@@ -92,11 +99,15 @@ impl Widget for &Timer {
     fn render(self, area: Rect, buf: &mut Buffer) {
         let (remaining_time, idx) = self.remaining_time();
         let time_str = if remaining_time < Duration::zero() {
-            if !self.execute.is_empty() && self.execute_result.borrow().is_none() {
-                let result = execute(&self.execute);
-                *self.execute_result.borrow_mut() = Some(result);
+            if self.execute_result.borrow().is_none() {
+                if !self.execute.is_empty() {
+                    let result = execute(&self.execute);
+                    *self.execute_result.borrow_mut() = Some(result);
+                } else {
+                    *self.execute_result.borrow_mut() = Some("".to_owned())
+                }
             }
-            if (remaining_time.num_milliseconds()).abs() % 1000 < 500 {
+            if remaining_time.num_milliseconds().abs() % 1000 < 500 {
                 return;
             } else {
                 format_duration(Duration::zero(), self.format)

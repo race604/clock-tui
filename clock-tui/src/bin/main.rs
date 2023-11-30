@@ -26,6 +26,10 @@ fn run_app<B: Backend>(
     let mut last_tick = Instant::now();
 
     loop {
+        if app.is_ended() {
+            return Ok(());
+        }
+
         terminal.draw(|f| app.ui(f))?;
 
         let timeout = tick_rate

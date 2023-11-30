@@ -62,6 +62,10 @@ pub enum Mode {
         #[clap(long = "paused", short = 'P', takes_value = false)]
         paused: bool,
 
+        /// Auto quit when time is up
+        #[clap(long = "quit", short = 'Q', takes_value = false)]
+        auto_quit: bool,
+
         /// Command to run when the timer ends
         #[clap(long, short, multiple = true, allow_hyphen_values = true)]
         execute: Vec<String>,
@@ -164,6 +168,7 @@ impl App {
                 repeat,
                 no_millis,
                 paused,
+                auto_quit,
                 execute,
             } => {
                 let format = if *no_millis {
@@ -179,6 +184,7 @@ impl App {
                     *repeat,
                     format,
                     *paused,
+                    *auto_quit,
                     execute.to_owned(),
                 ));
             }
@@ -228,6 +234,13 @@ impl App {
         } else if let Some(w) = self.stopwatch.as_mut() {
             handle_key(w, key);
         }
+    }
+
+    pub fn is_ended(&self) -> bool {
+        if let Some(ref w) = self.timer {
+            return w.is_finished();
+        }
+        false
     }
 }
 
