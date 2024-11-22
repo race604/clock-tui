@@ -2,8 +2,12 @@ use std::{cell::RefCell, cmp::min, process::Command};
 
 use crate::clock_text::BricksText;
 use chrono::{DateTime, Duration, Local};
-use tui::{buffer::Buffer, layout::Rect, style::Style, widgets::Widget};
-
+use tui::{
+    buffer::Buffer,
+    layout::Rect,
+    style::{Color, Style},
+    widgets::Widget,
+};
 use crate::app::Pause;
 
 use super::{format_duration, render_centered, DurationFormat};
@@ -20,6 +24,7 @@ pub struct Timer {
     passed: Duration,
     started_at: Option<DateTime<Local>>,
     execute_result: RefCell<Option<String>>,
+    flash_state: RefCell<bool>, // Add this new field
 }
 
 impl Timer {
@@ -47,6 +52,7 @@ impl Timer {
             passed: Duration::zero(),
             started_at: (!paused).then(Local::now),
             execute_result: RefCell::new(None),
+            flash_state: RefCell::new(false), // Initialize the new field
         }
     }
 
@@ -98,7 +104,8 @@ fn execute(execute: &[String]) -> String {
 impl Widget for &Timer {
     fn render(self, area: Rect, buf: &mut Buffer) {
         let (remaining_time, idx) = self.remaining_time();
-        let time_str = if remaining_time < Duration::zero() {
+        
+        if remaining_time < Duration::zero() {
             if self.execute_result.borrow().is_none() {
                 if !self.execute.is_empty() {
                     let result = execute(&self.execute);
@@ -107,28 +114,90 @@ impl Widget for &Timer {
                     *self.execute_result.borrow_mut() = Some("".to_owned())
                 }
             }
-            if remaining_time.num_milliseconds().abs() % 1000 < 500 {
-                return;
+
+            // Flash the screen when timer is done
+            let should_flash = remaining_time.num_milliseconds().abs() % 1000 < 500;
+            *self.flash_state.borrow_mut() = should_flash;
+
+            // Fill the entire area with the flash color
+            let flash_style = if *self.flash_state.borrow() {
+                Style::default().bg(Color::Green)
             } else {
-                format_duration(Duration::zero(), self.format)
+                Style::default().bg(Color::Black)
+            };
+
+            // Fill the entire area with the flash color
+            for y in area.top()..area.bottom() {
+                for x in area.left()..area.right() {
+                    buf.get_mut(x, y).set_style(flash_style);
+                }
+            }
+
+            // Only render the text during the visible phase
+            if should_flash {
+                let time_str = format_duration(Duration::zero(), self.format);
+                let header = if self.titles.is_empty() {
+                    None
+                } else {
+                    Some(self.titles[min(idx, self.titles.len() - 1)].clone())
+                };
+
+                let text = BricksText::new(
+                    time_str.as_str(),
+                    self.size,
+                    self.size,
+                    self.style.fg(Color::Black), // Make text visible on green background
+                );
+
+                let footer = if self.is_paused() {
+                    Some("PAUSED (press <SPACE> to resume)".to_string())
+                } else {
+                    self.execute_result.borrow().clone()
+                };
+
+                render_centered(area, buf, &text, header, footer);
+            }
+            if !should_flash {
+                let time_str = format_duration(Duration::zero(), self.format);
+                let header = if self.titles.is_empty() {
+                    None
+                } else {
+                    Some(self.titles[min(idx, self.titles.len() - 1)].clone())
+                };
+
+                let text = BricksText::new(
+                    time_str.as_str(),
+                    self.size,
+                    self.size,
+                    self.style, // Use original style during black phase
+                );
+
+                let footer = if self.is_paused() {
+                    Some("PAUSED (press <SPACE> to resume)".to_string())
+                } else {
+                    self.execute_result.borrow().clone()
+                };
+
+                render_centered(area, buf, &text, header, footer);
             }
         } else {
-            format_duration(remaining_time, self.format)
-        };
+            // Normal timer display when counting down
+            let time_str = format_duration(remaining_time, self.format);
+            let header = if self.titles.is_empty() {
+                None
+            } else {
+                Some(self.titles[min(idx, self.titles.len() - 1)].clone())
+            };
 
-        let header = if self.titles.is_empty() {
-            None
-        } else {
-            Some(self.titles[min(idx, self.titles.len() - 1)].clone())
-        };
+            let text = BricksText::new(time_str.as_str(), self.size, self.size, self.style);
+            let footer = if self.is_paused() {
+                Some("PAUSED (press <SPACE> to resume)".to_string())
+            } else {
+                self.execute_result.borrow().clone()
+            };
 
-        let text = BricksText::new(time_str.as_str(), self.size, self.size, self.style);
-        let footer = if self.is_paused() {
-            Some("PAUSED (press <SPACE> to resume)".to_string())
-        } else {
-            self.execute_result.borrow().clone()
-        };
-        render_centered(area, buf, &text, header, footer);
+            render_centered(area, buf, &text, header, footer);
+        }
     }
 }
 
