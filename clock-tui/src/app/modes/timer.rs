@@ -135,7 +135,8 @@ impl Widget for &Timer {
 
             // Only render the text during the visible phase
             if should_flash {
-                let time_str = format_duration(Duration::zero(), self.format);
+                let elapsed_time = -remaining_time; // Make the time positive
+                let time_str = format_duration(elapsed_time, self.format);
                 let header = if self.titles.is_empty() {
                     None
                 } else {
@@ -157,31 +158,8 @@ impl Widget for &Timer {
 
                 render_centered(area, buf, &text, header, footer);
             }
-            if !should_flash {
-                let time_str = format_duration(Duration::zero(), self.format);
-                let header = if self.titles.is_empty() {
-                    None
-                } else {
-                    Some(self.titles[min(idx, self.titles.len() - 1)].clone())
-                };
-
-                let text = BricksText::new(
-                    time_str.as_str(),
-                    self.size,
-                    self.size,
-                    self.style, // Use original style during black phase
-                );
-
-                let footer = if self.is_paused() {
-                    Some("PAUSED (press <SPACE> to resume)".to_string())
-                } else {
-                    self.execute_result.borrow().clone()
-                };
-
-                render_centered(area, buf, &text, header, footer);
-            }
         } else {
-            // Normal timer display when counting down
+            // Normal rendering logic when timer has not reached zero
             let time_str = format_duration(remaining_time, self.format);
             let header = if self.titles.is_empty() {
                 None
@@ -189,7 +167,13 @@ impl Widget for &Timer {
                 Some(self.titles[min(idx, self.titles.len() - 1)].clone())
             };
 
-            let text = BricksText::new(time_str.as_str(), self.size, self.size, self.style);
+            let text = BricksText::new(
+                time_str.as_str(),
+                self.size,
+                self.size,
+                self.style,
+            );
+
             let footer = if self.is_paused() {
                 Some("PAUSED (press <SPACE> to resume)".to_string())
             } else {
