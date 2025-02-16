@@ -2,7 +2,7 @@ use crate::clock_text::BricksText;
 use chrono::{DateTime, Duration, Local};
 use tui::{buffer::Buffer, layout::Rect, style::Style, widgets::Widget};
 
-use crate::app::Pause;
+use crate::app::modes::pause::Pause;
 
 use super::{format_duration, render_centered, DurationFormat};
 

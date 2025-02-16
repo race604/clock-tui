@@ -8,7 +8,7 @@ use tui::{
     style::{Color, Style},
     widgets::Widget,
 };
-use crate::app::Pause;
+use crate::app::modes::pause::Pause;
 
 use super::{format_duration, render_centered, DurationFormat};
 

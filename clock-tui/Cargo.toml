@@ -1,23 +1,18 @@
 [package]
 name = "clock-tui"
-version = "0.6.0"
+version = "0.1.0"
 edition = "2021"
-license = "MIT"
-description = "A clock app in terminal"
-homepage = "https://github.com/race604/clock-tui"
-repository = "https://github.com/race604/clock-tui"
-readme = "README.md"
-authors = ["Race604 <race604@gmail.com>"]
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-tui = "0.18.0"
-crossterm = "0.24"
+tui = "0.19"
+crossterm = "0.25"
 chrono = "0.4"
-clap = { version = "3.2.12", features = ["derive"] }
-regex = "1.6.0"
-chrono-tz = { version = "0.6.3", features = ["serde"] }
+chrono-tz = "0.8"
+clap = { version = "4.0", features = ["derive"] }
+regex = "1.7"
+toml = "0.7"
+serde = { version = "1.0", features = ["derive"] }
+dirs = "5.0"
 
 [lib]
 name = "clock_tui"

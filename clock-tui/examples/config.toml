@@ -1,0 +1,51 @@
+# Default configuration file for tclock
+# Copy this file to ~/.config/tclock/config.toml to enable configuration
+
+# Global default settings
+[default]
+# Default mode: clock, timer, stopwatch, countdown
+mode = "clock"
+# Default color
+color = "green"
+# Default size
+size = 1
+
+# Default settings for clock mode
+[clock]
+# Whether to show date
+show_date = true
+# Whether to show seconds
+show_seconds = true
+# Whether to show milliseconds
+show_millis = false
+# Timezone, e.g., "America/New_York", "Asia/Shanghai"
+# timezone = "America/New_York"
+
+# Default settings for timer mode
+[timer]
+# Default durations, can set multiple
+durations = ["25m", "5m"]
+# Corresponding titles, can set multiple
+titles = ["Work", "Break"]
+# Whether to repeat
+repeat = false
+# Whether to show milliseconds
+show_millis = true
+# Whether to start in paused state
+start_paused = false
+# Whether to auto quit after timer ends
+auto_quit = false
+# Commands to execute when timer ends
+execute = []
+
+# Default settings for stopwatch mode
+[stopwatch]
+
+# Default settings for countdown mode
+[countdown]
+# Whether to show milliseconds
+show_millis = false
+# Whether to continue counting after reaching zero
+continue_on_zero = false
+# Whether to count in reverse (count up)
+reverse = false
