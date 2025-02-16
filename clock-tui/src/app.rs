@@ -125,40 +125,49 @@ pub struct App {
 
 impl App {
     pub fn init_app(&mut self) {
-        // 加载配置文件
+        // Load config
         let config = Config::load();
         let default_config = config.as_ref().map(|c| &c.default);
 
-        // 设置默认模式
+        // default mode
         if self.mode.is_none() {
             self.mode = default_config.map(|c| match c.mode.as_str() {
-                "timer" => Mode::Timer {
-                    durations: vec![Duration::minutes(25), Duration::minutes(5)],
-                    titles: vec![],
-                    repeat: false,
-                    no_millis: false,
-                    paused: false,
-                    auto_quit: false,
-                    execute: vec![],
+                "timer" => {
+                    let timer_config = config.as_ref().map(|c| &c.timer);
+                    Mode::Timer {
+                        durations: timer_config.map(|c| c.durations.iter().filter_map(|d| parse_duration(d).ok()).collect()).unwrap_or_else(|| vec![Duration::minutes(25), Duration::minutes(5)]),
+                        titles: timer_config.map(|c| c.titles.clone()).unwrap_or_default(),
+                        repeat: timer_config.map(|c| c.repeat).unwrap_or(false),
+                        no_millis: !timer_config.map(|c| c.show_millis).unwrap_or(true),
+                        paused: timer_config.map(|c| c.start_paused).unwrap_or(false),
+                        auto_quit: timer_config.map(|c| c.auto_quit).unwrap_or(false),
+                        execute: timer_config.map(|c| c.execute.clone()).unwrap_or_default(),
+                    }
                 },
                 "stopwatch" => Mode::Stopwatch,
-                "countdown" => Mode::Countdown {
-                    time: Local::now(),
-                    title: None,
-                    continue_on_zero: false,
-                    reverse: false,
-                    millis: false,
+                "countdown" => {
+                    let countdown_config = config.as_ref().map(|c| &c.countdown);
+                    Mode::Countdown {
+                        time: Local::now(),
+                        title: None,
+                        continue_on_zero: countdown_config.map(|c| c.continue_on_zero).unwrap_or(false),
+                        reverse: countdown_config.map(|c| c.reverse).unwrap_or(false),
+                        millis: countdown_config.map(|c| c.show_millis).unwrap_or(false),
+                    }
                 },
-                _ => Mode::Clock {
-                    no_date: false,
-                    millis: false,
-                    no_seconds: false,
-                    timezone: None,
-                },
+                _ => {
+                    let clock_config = config.as_ref().map(|c| &c.clock);
+                    Mode::Clock {
+                        no_date: !clock_config.map(|c| c.show_date).unwrap_or(true),
+                        millis: clock_config.map(|c| c.show_millis).unwrap_or(false),
+                        no_seconds: !clock_config.map(|c| c.show_seconds).unwrap_or(true),
+                        timezone: clock_config.and_then(|c| c.timezone),
+                    }
+                }
             });
         }
 
-        // 设置默认颜色和大小
+        // set default color and size
         if self.color.is_none() {
             self.color = default_config
                 .map(|c| parse_color(&c.color).unwrap_or(Color::Green))
@@ -171,7 +180,7 @@ impl App {
         let style = Style::default().fg(self.color.unwrap_or(Color::Green));
         let size = self.size.unwrap_or(1);
 
-        // 根据模式初始化对应的组件
+        // initialize the clock mode
         match self.mode.as_ref().unwrap_or(&Mode::Clock {
             no_date: false,
             millis: false,
