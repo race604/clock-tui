@@ -148,8 +148,8 @@ impl App {
                 "countdown" => {
                     let countdown_config = config.as_ref().map(|c| &c.countdown);
                     Mode::Countdown {
-                        time: Local::now(),
-                        title: None,
+                        time: countdown_config.and_then(|c| c.time.as_ref()).and_then(|t| parse_datetime(t).ok()).unwrap_or_else(|| Local::now()),
+                        title: countdown_config.map(|c| c.title.clone()).unwrap_or(None),
                         continue_on_zero: countdown_config.map(|c| c.continue_on_zero).unwrap_or(false),
                         reverse: countdown_config.map(|c| c.reverse).unwrap_or(false),
                         millis: countdown_config.map(|c| c.show_millis).unwrap_or(false),

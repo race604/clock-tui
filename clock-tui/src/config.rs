@@ -74,6 +74,10 @@ pub struct StopwatchConfig {}
 #[derive(Debug, Deserialize)]
 pub struct CountdownConfig {
     #[serde(default)]
+    pub time: Option<String>,
+    #[serde(default)]
+    pub title: Option<String>,
+    #[serde(default)]
     pub show_millis: bool,
     #[serde(default)]
     pub continue_on_zero: bool,
@@ -125,6 +129,8 @@ impl Default for StopwatchConfig {
 impl Default for CountdownConfig {
     fn default() -> Self {
         Self {
+            time: None,
+            title: None,
             show_millis: false,
             continue_on_zero: false,
             reverse: false,

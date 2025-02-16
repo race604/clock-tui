@@ -43,6 +43,10 @@ execute = []
 
 # Default settings for countdown mode
 [countdown]
+# The target time to countdown to, eg. "2023-01-01", "20:00", "2022-12-25 20:00:00" or "2022-12-25T20:00:00-04:00"
+time = "2026-01-01"
+# Title or description for countdown show in header
+title = "New year"
 # Whether to show milliseconds
 show_millis = false
 # Whether to continue counting after reaching zero
