@@ -1,7 +1,13 @@
 [package]
 name = "clock-tui"
-version = "0.7.0"
+version = "0.6.0"
 edition = "2021"
+license = "MIT"
+description = "A clock app in terminal"
+homepage = "https://github.com/race604/clock-tui"
+repository = "https://github.com/race604/clock-tui"
+readme = "README.md"
+authors = ["Race604 <race604@gmail.com>"]
 
 [dependencies]
 tui = "0.19"
