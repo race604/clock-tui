@@ -242,6 +242,12 @@ impl App {
         }
         false
     }
+
+    pub fn on_exit(&self) {
+        if let Some(ref w) = self.stopwatch {
+            println!("Stopwatch time: {}", w.get_display_time());
+        }
+    }
 }
 
 fn handle_key<T: Pause>(widget: &mut T, key: KeyCode) {

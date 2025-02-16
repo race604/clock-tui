@@ -31,6 +31,10 @@ impl Stopwatch {
             self.duration
         }
     }
+
+    pub fn get_display_time(&self) -> String {
+        format_duration(self.total_time(), DurationFormat::HourMinSecDeci)
+    }
 }
 
 impl Widget for &Stopwatch {

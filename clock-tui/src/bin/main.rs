@@ -1,6 +1,6 @@
 use std::{
     error::Error,
-    io,
+    io::{self, Write},
     time::{Duration, Instant},
 };
 
@@ -84,7 +84,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     )?;
     terminal.show_cursor()?;
 
-    if let Err(err) = res {
+    if res.is_ok() {
+        app.on_exit();
+        io::stdout().flush()?;
+    } else if let Err(err) = res {
         eprintln!("{:?}", err)
     }
 
