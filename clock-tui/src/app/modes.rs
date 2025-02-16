@@ -2,6 +2,7 @@ mod clock;
 mod countdown;
 mod stopwatch;
 mod timer;
+mod pause;
 
 use std::cmp::min;
 use std::fmt::Write as _;
@@ -12,6 +13,7 @@ pub(crate) use clock::Clock;
 pub(crate) use countdown::Countdown;
 pub(crate) use stopwatch::Stopwatch;
 pub(crate) use timer::Timer;
+pub(crate) use pause::Pause;
 use tui::{
     buffer::Buffer,
     layout::Rect,

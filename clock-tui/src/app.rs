@@ -19,6 +19,7 @@ use self::modes::Countdown;
 use self::modes::DurationFormat;
 use self::modes::Stopwatch;
 use self::modes::Timer;
+use self::modes::Pause;
 
 pub mod modes;
 
@@ -30,44 +31,44 @@ pub enum Mode {
         #[clap(short = 'z', long, value_parser=parse_timezone)]
         timezone: Option<Tz>,
         /// Do not show date
-        #[clap(short = 'D', long, takes_value = false)]
+        #[clap(short = 'D', long, action)]
         no_date: bool,
         /// Do not show seconds
-        #[clap(short = 'S', long, takes_value = false)]
+        #[clap(short = 'S', long, action)]
         no_seconds: bool,
         /// Show milliseconds
-        #[clap(short, long, takes_value = false)]
+        #[clap(short, long, action)]
         millis: bool,
     },
     /// The timer mode displays the remaining time until the timer is finished.
     Timer {
         /// Initial duration for timer, value can be 10s for 10 seconds, 1m for 1 minute, etc.
         /// Also accept mulitple duration value and run the timers sequentially, eg. 25m 5m
-        #[clap(short, long="duration", value_parser = parse_duration, min_values=1, default_value = "5m")]
+        #[clap(short, long="duration", value_parser = parse_duration, num_args = 1.., default_value = "5m")]
         durations: Vec<Duration>,
 
         /// Set the title for the timer, also accept mulitple titles for each durations correspondingly
-        #[clap(short, long = "title", min_values = 0)]
+        #[clap(short, long = "title", num_args = 0..)]
         titles: Vec<String>,
 
         /// Restart the timer when timer is over
-        #[clap(long, short, takes_value = false)]
+        #[clap(long, short, action)]
         repeat: bool,
 
         /// Hide milliseconds
-        #[clap(long = "no-millis", short = 'M', takes_value = false)]
+        #[clap(long = "no-millis", short = 'M', action)]
         no_millis: bool,
 
         /// Start the timer paused
-        #[clap(long = "paused", short = 'P', takes_value = false)]
+        #[clap(long = "paused", short = 'P', action)]
         paused: bool,
 
         /// Auto quit when time is up
-        #[clap(long = "quit", short = 'Q', takes_value = false)]
+        #[clap(long = "quit", short = 'Q', action)]
         auto_quit: bool,
 
         /// Command to run when the timer ends
-        #[clap(long, short, multiple = true, allow_hyphen_values = true)]
+        #[clap(long, short, num_args = 1.., allow_hyphen_values = true)]
         execute: Vec<String>,
     },
     /// The stopwatch mode displays the elapsed time since it was started.
@@ -83,18 +84,20 @@ pub enum Mode {
         title: Option<String>,
 
         /// Continue to countdown after pass the target time
-        #[clap(long = "continue", short = 'c', takes_value = false)]
+        #[clap(long = "continue", short = 'c', action)]
         continue_on_zero: bool,
 
         /// Reverse the countdown, a.k.a. countup
-        #[clap(long, short, takes_value = false)]
+        #[clap(long, short, action)]
         reverse: bool,
 
         /// Show milliseconds
-        #[clap(short, long, takes_value = false)]
+        #[clap(short, long, action)]
         millis: bool,
     },
 }
+
+use crate::config::Config;
 
 #[derive(clap::Parser)]
 #[clap(name = "tclock", about = "A clock app in terminal", long_about = None)]
@@ -104,11 +107,11 @@ pub struct App {
     /// Foreground color of the clock, possible values are:
     ///     a) Any one of: Black, Red, Green, Yellow, Blue, Magenta, Cyan, Gray, DarkGray, LightRed, LightGreen, LightYellow, LightBlue, LightMagenta, LightCyan, White.
     ///     b) Hexadecimal color code: #RRGGBB.
-    #[clap(short, long, value_parser = parse_color, default_value = "green")]
-    pub color: Color,
+    #[clap(short, long, value_parser = parse_color)]
+    pub color: Option<Color>,
     /// Size of the clock, should be a positive integer (>=1).
-    #[clap(short, long, value_parser, default_value = "1")]
-    pub size: u16,
+    #[clap(short, long, value_parser)]
+    pub size: Option<u16>,
 
     #[clap(skip)]
     clock: Option<Clock>,
@@ -120,46 +123,84 @@ pub struct App {
     countdown: Option<Countdown>,
 }
 
-/// Trait for widgets that can be paused
-pub(crate) trait Pause {
-    fn is_paused(&self) -> bool;
-
-    fn pause(&mut self);
-
-    fn resume(&mut self);
-
-    fn toggle_paused(&mut self) {
-        if self.is_paused() {
-            self.resume()
-        } else {
-            self.pause()
-        }
-    }
-}
-
 impl App {
     pub fn init_app(&mut self) {
-        let style = Style::default().fg(self.color);
-        let mode = self.mode.as_ref().unwrap_or(&Mode::Clock {
+        // Load config
+        let config = Config::load();
+        let default_config = config.as_ref().map(|c| &c.default);
+
+        // default mode
+        if self.mode.is_none() {
+            self.mode = default_config.map(|c| match c.mode.as_str() {
+                "timer" => {
+                    let timer_config = config.as_ref().map(|c| &c.timer);
+                    Mode::Timer {
+                        durations: timer_config.map(|c| c.durations.iter().filter_map(|d| parse_duration(d).ok()).collect()).unwrap_or_else(|| vec![Duration::minutes(25), Duration::minutes(5)]),
+                        titles: timer_config.map(|c| c.titles.clone()).unwrap_or_default(),
+                        repeat: timer_config.map(|c| c.repeat).unwrap_or(false),
+                        no_millis: !timer_config.map(|c| c.show_millis).unwrap_or(true),
+                        paused: timer_config.map(|c| c.start_paused).unwrap_or(false),
+                        auto_quit: timer_config.map(|c| c.auto_quit).unwrap_or(false),
+                        execute: timer_config.map(|c| c.execute.clone()).unwrap_or_default(),
+                    }
+                },
+                "stopwatch" => Mode::Stopwatch,
+                "countdown" => {
+                    let countdown_config = config.as_ref().map(|c| &c.countdown);
+                    Mode::Countdown {
+                        time: countdown_config.and_then(|c| c.time.as_ref()).and_then(|t| parse_datetime(t).ok()).unwrap_or_else(|| Local::now()),
+                        title: countdown_config.map(|c| c.title.clone()).unwrap_or(None),
+                        continue_on_zero: countdown_config.map(|c| c.continue_on_zero).unwrap_or(false),
+                        reverse: countdown_config.map(|c| c.reverse).unwrap_or(false),
+                        millis: countdown_config.map(|c| c.show_millis).unwrap_or(false),
+                    }
+                },
+                _ => {
+                    let clock_config = config.as_ref().map(|c| &c.clock);
+                    Mode::Clock {
+                        no_date: !clock_config.map(|c| c.show_date).unwrap_or(true),
+                        millis: clock_config.map(|c| c.show_millis).unwrap_or(false),
+                        no_seconds: !clock_config.map(|c| c.show_seconds).unwrap_or(true),
+                        timezone: clock_config.and_then(|c| c.timezone),
+                    }
+                }
+            });
+        }
+
+        // set default color and size
+        if self.color.is_none() {
+            self.color = default_config
+                .map(|c| parse_color(&c.color).unwrap_or(Color::Green))
+                .or(Some(Color::Green));
+        }
+        if self.size.is_none() {
+            self.size = default_config.map(|c| c.size).or(Some(1));
+        }
+
+        let style = Style::default().fg(self.color.unwrap_or(Color::Green));
+        let size = self.size.unwrap_or(1);
+
+        // initialize the clock mode
+        match self.mode.as_ref().unwrap_or(&Mode::Clock {
             no_date: false,
             millis: false,
             no_seconds: false,
             timezone: None,
-        });
-        match mode {
+        }) {
             Mode::Clock {
                 no_date,
                 no_seconds,
                 millis,
                 timezone,
             } => {
+                let clock_config = config.as_ref().map(|c| &c.clock);
                 self.clock = Some(Clock {
-                    size: self.size,
+                    size,
                     style,
-                    show_date: !no_date,
-                    show_millis: *millis,
-                    show_secs: !no_seconds,
-                    timezone: *timezone,
+                    show_date: !no_date && clock_config.map(|c| c.show_date).unwrap_or(true),
+                    show_millis: *millis || clock_config.map(|c| c.show_millis).unwrap_or(false),
+                    show_secs: !no_seconds && clock_config.map(|c| c.show_seconds).unwrap_or(true),
+                    timezone: timezone.or_else(|| clock_config.and_then(|c| c.timezone)),
                 });
             }
             Mode::Timer {
@@ -171,25 +212,26 @@ impl App {
                 auto_quit,
                 execute,
             } => {
+                let timer_config = config.as_ref().map(|c| &c.timer);
                 let format = if *no_millis {
                     DurationFormat::HourMinSec
                 } else {
                     DurationFormat::HourMinSecDeci
                 };
                 self.timer = Some(Timer::new(
-                    self.size,
+                    size,
                     style,
                     durations.to_owned(),
                     titles.to_owned(),
-                    *repeat,
+                    *repeat || timer_config.map(|c| c.repeat).unwrap_or(false),
                     format,
-                    *paused,
-                    *auto_quit,
+                    *paused || timer_config.map(|c| c.start_paused).unwrap_or(false),
+                    *auto_quit || timer_config.map(|c| c.auto_quit).unwrap_or(false),
                     execute.to_owned(),
                 ));
             }
             Mode::Stopwatch => {
-                self.stopwatch = Some(Stopwatch::new(self.size, style));
+                self.stopwatch = Some(Stopwatch::new(size, style));
             }
             Mode::Countdown {
                 time,
@@ -198,14 +240,16 @@ impl App {
                 reverse,
                 millis,
             } => {
+                let countdown_config = config.as_ref().map(|c| &c.countdown);
                 self.countdown = Some(Countdown {
-                    size: self.size,
+                    size,
                     style,
                     time: *time,
                     title: title.to_owned(),
-                    continue_on_zero: *continue_on_zero,
-                    reverse: *reverse,
-                    format: if *millis {
+                    continue_on_zero: *continue_on_zero
+                        || countdown_config.map(|c| c.continue_on_zero).unwrap_or(false),
+                    reverse: *reverse || countdown_config.map(|c| c.reverse).unwrap_or(false),
+                    format: if *millis || countdown_config.map(|c| c.show_millis).unwrap_or(false) {
                         DurationFormat::HourMinSecDeci
                     } else {
                         DurationFormat::HourMinSec
@@ -309,23 +353,23 @@ fn parse_color(s: &str) -> Result<Color, String> {
 
 fn parse_datetime(s: &str) -> Result<DateTime<Local>, String> {
     let s = s.trim();
-    let today = Local::today();
+    let today = Local::now().date_naive();
 
     let time = NaiveTime::parse_from_str(s, "%H:%M");
     if let Ok(time) = time {
-        let time = NaiveDateTime::new(today.naive_local(), time);
+        let time = NaiveDateTime::new(today, time);
         return Ok(Local.from_local_datetime(&time).unwrap());
     }
 
     let time = NaiveTime::parse_from_str(s, "%H:%M:%S");
     if let Ok(time) = time {
-        let time = NaiveDateTime::new(today.naive_local(), time);
+        let time = NaiveDateTime::new(today, time);
         return Ok(Local.from_local_datetime(&time).unwrap());
     }
 
     let date = NaiveDate::parse_from_str(s, "%Y-%m-%d");
     if let Ok(date) = date {
-        let time = NaiveDateTime::new(date, NaiveTime::from_hms(0, 0, 0));
+        let time = NaiveDateTime::new(date, NaiveTime::from_hms_opt(0, 0, 0).unwrap());
         return Ok(Local.from_local_datetime(&time).unwrap());
     }
 
