@@ -1,5 +1,5 @@
-use crate::clock_text::ClockText;
 use crate::clock_text::font::bricks::BricksFont;
+use crate::clock_text::ClockText;
 use chrono::{DateTime, Duration, Local};
 use ratatui::{style::Style, widgets::Widget};
 

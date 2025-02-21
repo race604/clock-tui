@@ -1,13 +1,8 @@
-use crate::clock_text::ClockText;
 use crate::clock_text::font::bricks::BricksFont;
+use crate::clock_text::ClockText;
 use chrono::{Local, Utc};
 use chrono_tz::Tz;
-use ratatui::{
-    buffer::Buffer,
-    layout::Rect,
-    style::Style,
-    widgets::Widget
-};
+use ratatui::{buffer::Buffer, layout::Rect, style::Style, widgets::Widget};
 
 use super::render_centered;
 

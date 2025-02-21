@@ -1,19 +1,17 @@
 mod clock;
 mod countdown;
+mod pause;
 mod stopwatch;
 mod timer;
-mod pause;
 
 use std::cmp::min;
 use std::fmt::Write as _;
 
-use crate::clock_text::ClockText;
 use crate::clock_text::font::bricks::BricksFont;
+use crate::clock_text::ClockText;
 use chrono::Duration;
 pub(crate) use clock::Clock;
 pub(crate) use countdown::Countdown;
-pub(crate) use stopwatch::Stopwatch;
-pub(crate) use timer::Timer;
 pub(crate) use pause::Pause;
 use ratatui::{
     buffer::Buffer,
@@ -22,6 +20,8 @@ use ratatui::{
     text::Span,
     widgets::{Paragraph, Widget},
 };
+pub(crate) use stopwatch::Stopwatch;
+pub(crate) use timer::Timer;
 
 #[derive(Copy, Clone)]
 pub(crate) enum DurationFormat {

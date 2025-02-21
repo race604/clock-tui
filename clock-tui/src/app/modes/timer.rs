@@ -1,7 +1,8 @@
 use std::{cell::RefCell, cmp::min, process::Command};
 
-use crate::clock_text::ClockText;
+use crate::app::modes::pause::Pause;
 use crate::clock_text::font::bricks::BricksFont;
+use crate::clock_text::ClockText;
 use chrono::{DateTime, Duration, Local};
 use ratatui::{
     buffer::Buffer,
@@ -9,7 +10,6 @@ use ratatui::{
     style::{Color, Style},
     widgets::Widget,
 };
-use crate::app::modes::pause::Pause;
 
 use super::{format_duration, render_centered, DurationFormat};
 
@@ -105,7 +105,7 @@ fn execute(execute: &[String]) -> String {
 impl Widget for &Timer {
     fn render(self, area: Rect, buf: &mut Buffer) {
         let (remaining_time, idx) = self.remaining_time();
-        
+
         if remaining_time < Duration::zero() {
             if self.execute_result.borrow().is_none() {
                 if !self.execute.is_empty() {
@@ -169,11 +169,7 @@ impl Widget for &Timer {
             };
 
             let font = BricksFont::new(self.size);
-            let text = ClockText::new(
-                time_str.as_str().to_string(),
-                &font,
-                self.style,
-            );
+            let text = ClockText::new(time_str.as_str().to_string(), &font, self.style);
 
             let footer = if self.is_paused() {
                 Some("PAUSED (press <SPACE> to resume)".to_string())

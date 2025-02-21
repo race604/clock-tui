@@ -2,9 +2,10 @@ use std::error::Error;
 use std::io;
 use std::time::Duration;
 
+use clap::Parser;
 use clock_tui::app::App;
-use clock_tui::config::Config;
 use clock_tui::app::Mode;
+use clock_tui::config::Config;
 use crossterm::event::{self, Event, KeyCode};
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 use crossterm::terminal::{EnterAlternateScreen, LeaveAlternateScreen};
@@ -17,12 +18,13 @@ fn main() -> Result<(), Box<dyn Error>> {
     enable_raw_mode()?;
     let mut stdout = io::stdout();
     stdout.execute(EnterAlternateScreen)?;
-    let backend = CrosstermBackend::new(stdout);
+    let backend = CrosstermBackend::new(&mut stdout);
     let mut terminal = Terminal::new(backend)?;
 
-    // Create app and run it
-    let config = Config::load().ok_or("Failed to load config")?;
-    let mut app = App::default();
+    // Parse command line arguments
+    let mut app = App::parse();
+
+    // Load config and initialize app
     app.init_app();
 
     loop {
@@ -49,26 +51,17 @@ fn main() -> Result<(), Box<dyn Error>> {
                         auto_quit: false,
                         execute: vec![],
                     }),
-                    KeyCode::Char('d') => app.set_mode(Mode::Countdown {
-                        time: chrono::Local::now(),
-                        title: None,
-                        continue_on_zero: false,
-                        reverse: false,
-                        millis: false,
-                    }),
                     _ => {}
                 }
             }
         }
-
-        if app.is_ended() {
-            break;
-        }
     }
 
-    // Restore terminal
+    // restore terminal
+    terminal.show_cursor()?;
+    drop(terminal);
     disable_raw_mode()?;
-    terminal.backend_mut().execute(LeaveAlternateScreen)?;
-    app.on_exit();
+    stdout.execute(LeaveAlternateScreen)?;
+
     Ok(())
 }

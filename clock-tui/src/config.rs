@@ -1,7 +1,7 @@
-use std::path::PathBuf;
+use chrono::Duration;
 use chrono_tz::Tz;
 use serde::{Deserialize, Deserializer};
-use chrono::Duration;
+use std::path::PathBuf;
 
 fn deserialize_timezone<'de, D>(deserializer: D) -> Result<Option<Tz>, D::Error>
 where
