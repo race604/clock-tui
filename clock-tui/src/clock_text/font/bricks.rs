@@ -97,9 +97,9 @@ impl BricksFont {
                 vec![4, 2],
                 vec![0, 6],
             ]),
-            ':' => Some([vec![0, 2], vec![0, 2], vec![2, 0], vec![0, 2], vec![0, 2]]),
-            '.' => Some([vec![0, 0], vec![0, 0], vec![0, 0], vec![0, 0], vec![0, 2]]),
-            '-' => Some([vec![0, 0], vec![0, 0], vec![0, 6], vec![0, 0], vec![0, 0]]),
+            ':' => Some([vec![], vec![2, 2], vec![], vec![2, 2], vec![]]),
+            '.' => Some([vec![], vec![], vec![], vec![], vec![2, 2]]),
+            '-' => Some([vec![], vec![], vec![0, 6], vec![], vec![]]),
             _ => None,
         }
     }
