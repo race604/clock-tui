@@ -1,26 +1,27 @@
 mod clock;
 mod countdown;
+mod pause;
 mod stopwatch;
 mod timer;
-mod pause;
 
 use std::cmp::min;
 use std::fmt::Write as _;
 
-use crate::clock_text::BricksText;
+use crate::clock_text::font::bricks::BricksFont;
+use crate::clock_text::ClockText;
 use chrono::Duration;
 pub(crate) use clock::Clock;
 pub(crate) use countdown::Countdown;
-pub(crate) use stopwatch::Stopwatch;
-pub(crate) use timer::Timer;
 pub(crate) use pause::Pause;
-use tui::{
+use ratatui::{
     buffer::Buffer,
     layout::Rect,
     style::Style,
     text::Span,
     widgets::{Paragraph, Widget},
 };
+pub(crate) use stopwatch::Stopwatch;
+pub(crate) use timer::Timer;
 
 #[derive(Copy, Clone)]
 pub(crate) enum DurationFormat {
@@ -77,7 +78,7 @@ fn format_duration(duration: Duration, format: DurationFormat) -> String {
 fn render_centered(
     area: Rect,
     buf: &mut Buffer,
-    text: &BricksText,
+    text: &ClockText,
     header: Option<String>,
     footer: Option<String>,
 ) {
@@ -88,7 +89,7 @@ fn render_centered(
         width: min(text_size.0, area.width),
         height: min(text_size.1, area.height),
     };
-    text.render(text_area, buf);
+    text.clone().render(text_area, buf);
 
     let render_text_center = |text: &str, top: u16, buf: &mut Buffer| {
         let text_len = text.len() as u16;

@@ -10,7 +10,7 @@ readme = "README.md"
 authors = ["Race604 <race604@gmail.com>"]
 
 [dependencies]
-tui = "0.19"
+ratatui = "0.25.0"
 crossterm = "0.25"
 chrono = "0.4"
 chrono-tz = "0.8"

@@ -1,16 +1,19 @@
 use std::cmp::min;
 
-use tui::{buffer::Buffer, layout::Rect, style::Style};
+use ratatui::{buffer::Buffer, layout::Rect, style::Style};
 
-use super::Font;
 use crate::clock_text::point::Point;
 
-pub struct Bricks {
+use super::Font;
+
+pub struct BricksFont {
     pub size: u16,
 }
 
-impl Bricks {
-    const UNIT_SIZE: Point = Point(6, 5);
+impl BricksFont {
+    pub fn new(size: u16) -> Self {
+        Self { size }
+    }
 
     /// each row is represented with a vector of numbers:
     ///   the odd indexed items represent the lenght of "off",
@@ -24,22 +27,23 @@ impl Bricks {
         row: Vec<u16>,
         size: u16,
         style: Style,
-        area: &Rect,
+        area_right: u16,
+        area_bottom: u16,
         buf: &mut Buffer,
     ) {
         let mut p = start;
         let mut on = false;
         for len in row {
             let len = len * size;
-            if p.0 > area.right() {
+            if p.0 > area_right {
                 break;
             }
 
             if on {
-                let s = min(len, area.right() - p.0 + 1);
+                let s = std::cmp::min(len, area_right - p.0 + 1);
                 let line = "█".repeat(s as usize);
                 for r in 0..size {
-                    if p.1 > area.bottom() {
+                    if p.1 > area_bottom {
                         break;
                     }
                     buf.set_string(p.0, p.1 + r, line.as_str(), style);
@@ -51,71 +55,78 @@ impl Bricks {
         }
     }
 
-    fn draw_matrix(mat: [Vec<u16>; 5], size: u16, style: Style, area: &Rect, buf: &mut Buffer) {
-        let mut start = Point(area.x, area.y);
-        for row in mat {
-            Self::draw_row(start, row, size, style, area, buf);
-            start.1 += size;
-        }
-    }
-}
-
-impl Font for Bricks {
-    fn size(&self) -> Point {
-        Self::UNIT_SIZE * self.size
-    }
-
-    fn render(&self, char: char, style: Style, area: Rect, buf: &mut Buffer) {
-        let size = self.size;
-        let mut render_matrix = |mat: [Vec<u16>; 5]| {
-            Bricks::draw_matrix(mat, size, style, &area, buf);
-        };
-
-        match char {
-            '0' => render_matrix([
+    fn get_char_matrix(c: char) -> Option<[Vec<u16>; 5]> {
+        match c {
+            '0' => Some([
                 vec![0, 6],
                 vec![0, 2, 2, 2],
                 vec![0, 2, 2, 2],
                 vec![0, 2, 2, 2],
                 vec![0, 6],
             ]),
-            '1' => render_matrix([vec![0, 4], vec![2, 2], vec![2, 2], vec![2, 2], vec![0, 6]]),
-            '2' => render_matrix([vec![0, 6], vec![4, 2], vec![0, 6], vec![0, 2], vec![0, 6]]),
-            '3' => render_matrix([vec![0, 6], vec![4, 2], vec![0, 6], vec![4, 2], vec![0, 6]]),
-            '4' => render_matrix([
+            '1' => Some([vec![0, 4], vec![2, 2], vec![2, 2], vec![2, 2], vec![0, 6]]),
+            '2' => Some([vec![0, 6], vec![4, 2], vec![0, 6], vec![0, 2], vec![0, 6]]),
+            '3' => Some([vec![0, 6], vec![4, 2], vec![0, 6], vec![4, 2], vec![0, 6]]),
+            '4' => Some([
                 vec![0, 2, 2, 2],
                 vec![0, 2, 2, 2],
                 vec![0, 6],
                 vec![4, 2],
                 vec![4, 2],
             ]),
-            '5' => render_matrix([vec![0, 6], vec![0, 2], vec![0, 6], vec![4, 2], vec![0, 6]]),
-            '6' => render_matrix([
+            '5' => Some([vec![0, 6], vec![0, 2], vec![0, 6], vec![4, 2], vec![0, 6]]),
+            '6' => Some([
                 vec![0, 6],
                 vec![0, 2],
                 vec![0, 6],
                 vec![0, 2, 2, 2],
                 vec![0, 6],
             ]),
-            '7' => render_matrix([vec![0, 6], vec![4, 2], vec![4, 2], vec![4, 2], vec![4, 2]]),
-            '8' => render_matrix([
+            '7' => Some([vec![0, 6], vec![4, 2], vec![4, 2], vec![4, 2], vec![4, 2]]),
+            '8' => Some([
                 vec![0, 6],
                 vec![0, 2, 2, 2],
                 vec![0, 6],
                 vec![0, 2, 2, 2],
                 vec![0, 6],
             ]),
-            '9' => render_matrix([
+            '9' => Some([
                 vec![0, 6],
                 vec![0, 2, 2, 2],
                 vec![0, 6],
                 vec![4, 2],
                 vec![0, 6],
             ]),
-            ':' => render_matrix([vec![], vec![2, 2], vec![], vec![2, 2], vec![]]),
-            '.' => render_matrix([vec![], vec![], vec![], vec![], vec![2, 2]]),
-            '-' => render_matrix([vec![], vec![], vec![0, 6], vec![], vec![]]),
-            _ => {}
+            ':' => Some([vec![], vec![2, 2], vec![], vec![2, 2], vec![]]),
+            '.' => Some([vec![], vec![], vec![], vec![], vec![2, 2]]),
+            '-' => Some([vec![], vec![], vec![0, 6], vec![], vec![]]),
+            _ => None,
+        }
+    }
+}
+
+impl Font for BricksFont {
+    fn get_char(&self, c: char) -> Option<&[Point]> {
+        None // We don't use points for BricksFont
+    }
+
+    fn get_char_width(&self) -> u16 {
+        6 * self.size
+    }
+
+    fn get_char_height(&self) -> u16 {
+        5 * self.size
+    }
+
+    fn draw_char(&self, c: char, x: u16, y: u16, style: Style, buf: &mut Buffer) {
+        if let Some(matrix) = Self::get_char_matrix(c) {
+            let mut start = Point(x, y);
+            let area_right = buf.area.right();
+            let area_bottom = buf.area.bottom();
+            for row in matrix {
+                Self::draw_row(start, row, self.size, style, area_right, area_bottom, buf);
+                start.1 += self.size;
+            }
         }
     }
 }
