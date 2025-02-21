@@ -9,10 +9,7 @@ use chrono_tz::Tz;
 use clap::Subcommand;
 use crossterm::event::KeyCode;
 use regex::Regex;
-use tui::backend::Backend;
-use tui::style::Color;
-use tui::style::Style;
-use tui::Frame;
+use ratatui::{Frame, style::{Color, Style}};
 
 use self::modes::Clock;
 use self::modes::Countdown;
@@ -99,7 +96,7 @@ pub enum Mode {
 
 use crate::config::Config;
 
-#[derive(clap::Parser)]
+#[derive(clap::Parser, Default)]
 #[clap(name = "tclock", about = "A clock app in terminal", long_about = None)]
 pub struct App {
     #[clap(subcommand)]
@@ -124,6 +121,11 @@ pub struct App {
 }
 
 impl App {
+    pub fn set_mode(&mut self, mode: Mode) {
+        self.mode = Some(mode);
+        self.init_app();
+    }
+
     pub fn init_app(&mut self) {
         // Load config
         let config = Config::load();
@@ -259,7 +261,7 @@ impl App {
         }
     }
 
-    pub fn ui<B: Backend>(&self, f: &mut Frame<B>) {
+    pub fn ui(&self, f: &mut Frame) {
         if let Some(ref w) = self.clock {
             f.render_widget(w, f.size());
         } else if let Some(ref w) = self.timer {

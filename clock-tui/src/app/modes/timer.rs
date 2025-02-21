@@ -1,8 +1,9 @@
 use std::{cell::RefCell, cmp::min, process::Command};
 
-use crate::clock_text::BricksText;
+use crate::clock_text::ClockText;
+use crate::clock_text::font::bricks::BricksFont;
 use chrono::{DateTime, Duration, Local};
-use tui::{
+use ratatui::{
     buffer::Buffer,
     layout::Rect,
     style::{Color, Style},
@@ -143,10 +144,10 @@ impl Widget for &Timer {
                     Some(self.titles[min(idx, self.titles.len() - 1)].clone())
                 };
 
-                let text = BricksText::new(
-                    time_str.as_str(),
-                    self.size,
-                    self.size,
+                let font = BricksFont::new(self.size);
+                let text = ClockText::new(
+                    time_str.as_str().to_string(),
+                    &font,
                     self.style.fg(Color::Black), // Make text visible on green background
                 );
 
@@ -167,10 +168,10 @@ impl Widget for &Timer {
                 Some(self.titles[min(idx, self.titles.len() - 1)].clone())
             };
 
-            let text = BricksText::new(
-                time_str.as_str(),
-                self.size,
-                self.size,
+            let font = BricksFont::new(self.size);
+            let text = ClockText::new(
+                time_str.as_str().to_string(),
+                &font,
                 self.style,
             );
 

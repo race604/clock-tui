@@ -175,7 +175,6 @@ impl Config {
         };
 
         let content = std::fs::read_to_string(config_path).ok()?;
-        println!("读取到的配置文件内容:\n{}", content);
         match toml::from_str(&content) {
             Ok(config) => Some(config),
             Err(e) => {
