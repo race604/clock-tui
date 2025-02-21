@@ -24,7 +24,7 @@ pub trait Font {
     fn draw_str(&self, s: &str, area: Rect, style: Style, buf: &mut Buffer) {
         let mut x = area.x;
         let y = area.y;
-        let spacing = 2; // 添加字符间距
+        let spacing = 2;
         for c in s.chars() {
             if x + self.get_char_width() > area.right() {
                 break;

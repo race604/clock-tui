@@ -34,7 +34,7 @@ impl Widget for &Clock {
             time_str.truncate(time_str.len() - 7);
         } else {
             time_str.truncate(time_str.len() - 4);
-        };
+        }
         let time_str = time_str.as_str();
         let font = BricksFont::new(self.size);
         let text = ClockText::new(time_str.to_string(), &font, self.style);

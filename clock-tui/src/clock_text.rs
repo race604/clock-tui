@@ -17,7 +17,7 @@ impl<'a> ClockText<'a> {
         ClockText { text, font, style }
     }
     pub fn size(&self) -> (u16, u16) {
-        let width = self.text.chars().count() as u16 * self.font.get_char_width();
+        let width = self.text.chars().count() as u16 * (self.font.get_char_width() + 2) - 2;
         let height = self.font.get_char_height();
         (width, height)
     }
