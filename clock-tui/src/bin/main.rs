@@ -1,95 +1,67 @@
-use std::{
-    error::Error,
-    io::{self, Write},
-    time::{Duration, Instant},
-};
+use std::error::Error;
+use std::io;
+use std::time::Duration;
 
 use clap::Parser;
-use clock_tui::app::Mode;
-use crossterm::{
-    event::{self, Event, KeyCode},
-    execute,
-    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
-};
-use tui::{
-    backend::{Backend, CrosstermBackend},
-    Terminal,
-};
-
 use clock_tui::app::App;
+use clock_tui::app::Mode;
+use clock_tui::config::Config;
+use crossterm::event::{self, Event, KeyCode};
+use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
+use crossterm::terminal::{EnterAlternateScreen, LeaveAlternateScreen};
+use crossterm::ExecutableCommand;
+use ratatui::backend::CrosstermBackend;
+use ratatui::Terminal;
 
-fn run_app<B: Backend>(
-    terminal: &mut Terminal<B>,
-    app: &mut App,
-    tick_rate: Duration,
-) -> io::Result<()> {
-    let mut last_tick = Instant::now();
+fn main() -> Result<(), Box<dyn Error>> {
+    // Setup terminal
+    enable_raw_mode()?;
+    let mut stdout = io::stdout();
+    stdout.execute(EnterAlternateScreen)?;
+    let backend = CrosstermBackend::new(&mut stdout);
+    let mut terminal = Terminal::new(backend)?;
+
+    // Parse command line arguments
+    let mut app = App::parse();
+
+    // Load config and initialize app
+    app.init_app();
 
     loop {
-        if app.is_ended() {
-            return Ok(());
-        }
-
         terminal.draw(|f| app.ui(f))?;
 
-        let timeout = tick_rate
-            .checked_sub(last_tick.elapsed())
-            .unwrap_or(Duration::ZERO);
-        if event::poll(timeout)? {
+        if event::poll(Duration::from_millis(250))? {
             if let Event::Key(key) = event::read()? {
                 match key.code {
-                    KeyCode::Char('q') => {
-                        return Ok(());
-                    }
-                    key => app.on_key(key),
+                    KeyCode::Char('q') => break,
+                    KeyCode::Char(' ') => app.on_key(KeyCode::Char(' ')),
+                    KeyCode::Char('c') => app.set_mode(Mode::Clock {
+                        timezone: None,
+                        no_date: false,
+                        no_seconds: false,
+                        millis: false,
+                    }),
+                    KeyCode::Char('w') => app.set_mode(Mode::Stopwatch),
+                    KeyCode::Char('t') => app.set_mode(Mode::Timer {
+                        durations: vec![],
+                        titles: vec![],
+                        repeat: false,
+                        no_millis: false,
+                        paused: false,
+                        auto_quit: false,
+                        execute: vec![],
+                    }),
+                    _ => {}
                 }
             }
         }
-
-        if last_tick.elapsed() >= tick_rate {
-            last_tick = Instant::now();
-        }
     }
-}
-
-fn main() -> Result<(), Box<dyn Error>> {
-    let mut app = App::parse();
-    app.init_app();
-
-    // setup terminal
-    enable_raw_mode()?;
-    let mut stdout = io::stdout();
-    execute!(stdout, EnterAlternateScreen /*EnableMouseCapture*/,)?;
-    let backend = CrosstermBackend::new(stdout);
-    let mut terminal = Terminal::new(backend)?;
-
-    // create app and run it
-    let low_rate = match app.mode {
-        Some(Mode::Clock {
-            millis, no_seconds, ..
-        }) => !millis || no_seconds,
-        Some(Mode::Timer { no_millis, .. }) => no_millis,
-        Some(Mode::Countdown { millis, .. }) => !millis,
-        _ => false,
-    };
-    let tick_rate = Duration::from_millis(if low_rate { 200 } else { 20 });
-    let res = run_app(&mut terminal, &mut app, tick_rate);
 
     // restore terminal
-    disable_raw_mode()?;
-    execute!(
-        terminal.backend_mut(),
-        LeaveAlternateScreen,
-        // DisableMouseCapture
-    )?;
     terminal.show_cursor()?;
-
-    if res.is_ok() {
-        app.on_exit();
-        io::stdout().flush()?;
-    } else if let Err(err) = res {
-        eprintln!("{:?}", err)
-    }
+    drop(terminal);
+    disable_raw_mode()?;
+    stdout.execute(LeaveAlternateScreen)?;
 
     Ok(())
 }

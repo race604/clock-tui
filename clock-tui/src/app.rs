@@ -8,18 +8,18 @@ use chrono::TimeZone;
 use chrono_tz::Tz;
 use clap::Subcommand;
 use crossterm::event::KeyCode;
+use ratatui::{
+    style::{Color, Style},
+    Frame,
+};
 use regex::Regex;
-use tui::backend::Backend;
-use tui::style::Color;
-use tui::style::Style;
-use tui::Frame;
 
 use self::modes::Clock;
 use self::modes::Countdown;
 use self::modes::DurationFormat;
+use self::modes::Pause;
 use self::modes::Stopwatch;
 use self::modes::Timer;
-use self::modes::Pause;
 
 pub mod modes;
 
@@ -99,7 +99,7 @@ pub enum Mode {
 
 use crate::config::Config;
 
-#[derive(clap::Parser)]
+#[derive(clap::Parser, Default)]
 #[clap(name = "tclock", about = "A clock app in terminal", long_about = None)]
 pub struct App {
     #[clap(subcommand)]
@@ -124,6 +124,11 @@ pub struct App {
 }
 
 impl App {
+    pub fn set_mode(&mut self, mode: Mode) {
+        self.mode = Some(mode);
+        self.init_app();
+    }
+
     pub fn init_app(&mut self) {
         // Load config
         let config = Config::load();
@@ -135,7 +140,14 @@ impl App {
                 "timer" => {
                     let timer_config = config.as_ref().map(|c| &c.timer);
                     Mode::Timer {
-                        durations: timer_config.map(|c| c.durations.iter().filter_map(|d| parse_duration(d).ok()).collect()).unwrap_or_else(|| vec![Duration::minutes(25), Duration::minutes(5)]),
+                        durations: timer_config
+                            .map(|c| {
+                                c.durations
+                                    .iter()
+                                    .filter_map(|d| parse_duration(d).ok())
+                                    .collect()
+                            })
+                            .unwrap_or_else(|| vec![Duration::minutes(25), Duration::minutes(5)]),
                         titles: timer_config.map(|c| c.titles.clone()).unwrap_or_default(),
                         repeat: timer_config.map(|c| c.repeat).unwrap_or(false),
                         no_millis: !timer_config.map(|c| c.show_millis).unwrap_or(true),
@@ -143,18 +155,23 @@ impl App {
                         auto_quit: timer_config.map(|c| c.auto_quit).unwrap_or(false),
                         execute: timer_config.map(|c| c.execute.clone()).unwrap_or_default(),
                     }
-                },
+                }
                 "stopwatch" => Mode::Stopwatch,
                 "countdown" => {
                     let countdown_config = config.as_ref().map(|c| &c.countdown);
                     Mode::Countdown {
-                        time: countdown_config.and_then(|c| c.time.as_ref()).and_then(|t| parse_datetime(t).ok()).unwrap_or_else(|| Local::now()),
+                        time: countdown_config
+                            .and_then(|c| c.time.as_ref())
+                            .and_then(|t| parse_datetime(t).ok())
+                            .unwrap_or_else(|| Local::now()),
                         title: countdown_config.map(|c| c.title.clone()).unwrap_or(None),
-                        continue_on_zero: countdown_config.map(|c| c.continue_on_zero).unwrap_or(false),
+                        continue_on_zero: countdown_config
+                            .map(|c| c.continue_on_zero)
+                            .unwrap_or(false),
                         reverse: countdown_config.map(|c| c.reverse).unwrap_or(false),
                         millis: countdown_config.map(|c| c.show_millis).unwrap_or(false),
                     }
-                },
+                }
                 _ => {
                     let clock_config = config.as_ref().map(|c| &c.clock);
                     Mode::Clock {
@@ -247,7 +264,9 @@ impl App {
                     time: *time,
                     title: title.to_owned(),
                     continue_on_zero: *continue_on_zero
-                        || countdown_config.map(|c| c.continue_on_zero).unwrap_or(false),
+                        || countdown_config
+                            .map(|c| c.continue_on_zero)
+                            .unwrap_or(false),
                     reverse: *reverse || countdown_config.map(|c| c.reverse).unwrap_or(false),
                     format: if *millis || countdown_config.map(|c| c.show_millis).unwrap_or(false) {
                         DurationFormat::HourMinSecDeci
@@ -259,7 +278,7 @@ impl App {
         }
     }
 
-    pub fn ui<B: Backend>(&self, f: &mut Frame<B>) {
+    pub fn ui(&self, f: &mut Frame) {
         if let Some(ref w) = self.clock {
             f.render_widget(w, f.size());
         } else if let Some(ref w) = self.timer {

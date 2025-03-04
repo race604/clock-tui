@@ -1,7 +1,7 @@
-use std::path::PathBuf;
+use chrono::Duration;
 use chrono_tz::Tz;
 use serde::{Deserialize, Deserializer};
-use chrono::Duration;
+use std::path::PathBuf;
 
 fn deserialize_timezone<'de, D>(deserializer: D) -> Result<Option<Tz>, D::Error>
 where
@@ -175,7 +175,6 @@ impl Config {
         };
 
         let content = std::fs::read_to_string(config_path).ok()?;
-        println!("读取到的配置文件内容:\n{}", content);
         match toml::from_str(&content) {
             Ok(config) => Some(config),
             Err(e) => {

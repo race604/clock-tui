@@ -1,6 +1,7 @@
-use crate::clock_text::BricksText;
+use crate::clock_text::font::bricks::BricksFont;
+use crate::clock_text::ClockText;
 use chrono::{DateTime, Duration, Local};
-use tui::{style::Style, widgets::Widget};
+use ratatui::{style::Style, widgets::Widget};
 
 use super::{format_duration, render_centered, DurationFormat};
 
@@ -27,7 +28,7 @@ impl Countdown {
 }
 
 impl Widget for &Countdown {
-    fn render(self, area: tui::layout::Rect, buf: &mut tui::buffer::Buffer) {
+    fn render(self, area: ratatui::layout::Rect, buf: &mut ratatui::buffer::Buffer) {
         let remaining_time = self.remaining_time();
         let time_str = if remaining_time < Duration::zero() && !self.continue_on_zero {
             if (remaining_time.num_milliseconds()).abs() % 1000 < 500 {
@@ -39,7 +40,8 @@ impl Widget for &Countdown {
             format_duration(remaining_time, self.format)
         };
 
-        let text = BricksText::new(time_str.as_str(), self.size, self.size, self.style);
+        let font = BricksFont::new(self.size);
+        let text = ClockText::new(time_str.to_string(), &font, self.style);
         render_centered(area, buf, &text, self.title.to_owned(), None);
     }
 }
