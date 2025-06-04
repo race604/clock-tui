@@ -1,5 +1,5 @@
 use std::error::Error;
-use std::io;
+use std::io::{self, Write};
 use std::time::Duration;
 
 use clap::Parser;
@@ -14,15 +14,16 @@ use ratatui::backend::CrosstermBackend;
 use ratatui::Terminal;
 
 fn main() -> Result<(), Box<dyn Error>> {
+    // Parse command line arguments
+    // Must be done first so `--help` isn't printed to the alternate screen.
+    let mut app = App::parse();
+
     // Setup terminal
     enable_raw_mode()?;
     let mut stdout = io::stdout();
     stdout.execute(EnterAlternateScreen)?;
     let backend = CrosstermBackend::new(&mut stdout);
     let mut terminal = Terminal::new(backend)?;
-
-    // Parse command line arguments
-    let mut app = App::parse();
 
     // Load config and initialize app
     app.init_app();
@@ -62,6 +63,11 @@ fn main() -> Result<(), Box<dyn Error>> {
     drop(terminal);
     disable_raw_mode()?;
     stdout.execute(LeaveAlternateScreen)?;
+
+    // Perform logic such as printing the stopwatch time.
+    // Must be done after leaving alternate screen.
+    app.on_exit();
+    io::stdout().flush()?;
 
     Ok(())
 }
