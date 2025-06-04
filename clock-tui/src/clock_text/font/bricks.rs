@@ -1,6 +1,5 @@
-use std::cmp::min;
 
-use ratatui::{buffer::Buffer, layout::Rect, style::Style};
+use ratatui::{buffer::Buffer, style::Style};
 
 use crate::clock_text::point::Point;
 
@@ -106,7 +105,7 @@ impl BricksFont {
 }
 
 impl Font for BricksFont {
-    fn get_char(&self, c: char) -> Option<&[Point]> {
+    fn get_char(&self, _c: char) -> Option<&[Point]> {
         None // We don't use points for BricksFont
     }
 

@@ -7,7 +7,6 @@ mod timer;
 use std::cmp::min;
 use std::fmt::Write as _;
 
-use crate::clock_text::font::bricks::BricksFont;
 use crate::clock_text::ClockText;
 use chrono::Duration;
 pub(crate) use clock::Clock;
