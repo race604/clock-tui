@@ -1,4 +1,4 @@
-use clap::{ArgEnum, IntoApp};
+use clap::{CommandFactory, ValueEnum};
 use clap_complete::{generate_to, Shell};
 use clap_mangen::Man;
 use clock_tui::app::App;
@@ -10,7 +10,7 @@ use std::{env, fs};
 const BIN_NAME: &str = "tclock";
 
 fn build_shell_completion(outdir: &Path) -> Result<()> {
-    let mut app = App::into_app();
+    let mut app = App::command();
     let shells = Shell::value_variants();
 
     for shell in shells {
@@ -21,7 +21,7 @@ fn build_shell_completion(outdir: &Path) -> Result<()> {
 }
 
 fn build_manpages(outdir: &Path) -> Result<()> {
-    let app = App::into_app();
+    let app = App::command();
 
     let file = Path::new(&outdir).join(format!("{}.1", BIN_NAME));
     let mut file = File::create(&file)?;
