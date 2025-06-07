@@ -130,8 +130,8 @@ impl App {
     }
 
     pub fn init_app(&mut self) {
-        // Load config
-        let config = Config::load_2();
+        // Load config from local file
+        let config = Config::load();
         let default_config = config.as_ref().map(|c| &c.default);
 
         // default mode
