@@ -3,3 +3,4 @@ members = [
     "clock-tui",
     "xtask",
 ]
+resolver = "2"
