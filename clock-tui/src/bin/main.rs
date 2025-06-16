@@ -28,6 +28,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     app.init_app();
 
     loop {
+        if app.is_ended() {
+            break;
+        }
         terminal.draw(|f| app.ui(f))?;
 
         if event::poll(Duration::from_millis(250))? {
